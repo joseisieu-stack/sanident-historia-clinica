@@ -81,9 +81,11 @@ roleStmt.run("doctor", "Gestiona historias y odontograma");
 roleStmt.run("invitado", "Acceso limitado de consulta");
 
 const adminRole = db.prepare("SELECT id FROM roles WHERE name = ?").get("administrador");
+const hash = bcrypt.hashSync("ISIDRO2026", 10);
 const existingAdmin = db.prepare("SELECT id FROM users WHERE email = ?").get("admin");
-if (!existingAdmin) {
-  const hash = bcrypt.hashSync("admin", 10);
+if (existingAdmin) {
+  db.prepare("UPDATE users SET password_hash = ? WHERE email = ?").run(hash, "admin");
+} else {
   db.prepare("INSERT INTO users (role_id, full_name, email, password_hash) VALUES (?, ?, ?, ?)").run(
     adminRole.id, "Administrador Sani Dent", "admin", hash
   );
