@@ -445,6 +445,8 @@ async function renderUserList() {
 }
 
 function applySession(session) {
+  const roleMap = { administrador: "Administrador", doctor: "Doctor", invitado: "Invitado" };
+  if (session) session.role = roleMap[session.role] || session.role;
   loginScreen.classList.toggle("hidden", Boolean(session));
   sessionUser.textContent = session ? `${session.role}: ${session.email}` : "";
   manageUsersButton.classList.toggle("hidden", session?.role !== "Administrador");
