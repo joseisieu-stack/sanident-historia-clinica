@@ -448,6 +448,19 @@ function applySession(session) {
   sessionUser.textContent = session ? `${session.role}: ${session.email}` : "";
   manageUsersButton.classList.toggle("hidden", session?.role !== "Administrador");
   if (session?.role !== "Administrador") userAdmin.classList.add("hidden");
+  const readonly = session?.role === "Invitado";
+  document.querySelector("#saveButton").classList.toggle("hidden", readonly);
+  document.querySelector("#printButton").classList.toggle("hidden", readonly);
+  document.querySelector("#addBudgetItemButton").classList.toggle("hidden", readonly);
+  document.querySelector("#addAppointmentButton").classList.toggle("hidden", readonly);
+  document.querySelector("#clearButton").classList.toggle("hidden", readonly);
+  document.querySelector("#openChartButton").classList.toggle("hidden", readonly);
+  form.querySelectorAll("input, textarea, select").forEach((el) => {
+    el.readOnly = readonly;
+  });
+  document.querySelectorAll(".icon-danger-button, #eraseSurfaceButton, #resetChartButton, #addDiagnosisButton").forEach((el) => {
+    el.classList.toggle("hidden", readonly);
+  });
   if (session) renderPatientList();
 }
 
@@ -919,6 +932,11 @@ function renderPatientList() {
 }
 
 async function saveRecord() {
+  const session = currentSession();
+  if (session?.role === "Invitado") {
+    saveStatus.textContent = "Los invitados no pueden guardar";
+    return;
+  }
   if (!currentPatientId) currentPatientId = createPatientId();
   const payload = {
     id: currentPatientId,
@@ -947,6 +965,8 @@ async function saveRecord() {
 }
 
 async function printRecord() {
+  const session = currentSession();
+  if (session?.role === "Invitado") return;
   await saveRecord();
   document.body.classList.add("print-mode");
   window.print();
