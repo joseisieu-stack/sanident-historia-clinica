@@ -520,6 +520,27 @@ textarea {
   resize: vertical;
 }
 
+.password-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.password-wrap input {
+  flex: 1;
+}
+
+.toggle-pass {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 8px 10px;
+  min-height: 42px;
+}
+
 input:focus,
 textarea:focus,
 select:focus,

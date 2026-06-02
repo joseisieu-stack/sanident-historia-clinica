@@ -1333,6 +1333,17 @@ manageUsersButton.addEventListener("click", async () => {
 });
 window.addEventListener("afterprint", () => document.body.classList.remove("print-mode"));
 
+document.addEventListener("click", (event) => {
+  const btn = event.target.closest(".toggle-pass");
+  if (!btn) return;
+  const input = document.querySelector(`#${btn.dataset.target}`);
+  if (!input) return;
+  const isPassword = input.type === "password";
+  input.type = isPassword ? "text" : "password";
+  btn.textContent = isPassword ? "🙈" : "👁";
+  btn.setAttribute("aria-label", isPassword ? "Ocultar contraseña" : "Mostrar contraseña");
+});
+
 userForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = newUserEmail.value.trim().toLowerCase();
