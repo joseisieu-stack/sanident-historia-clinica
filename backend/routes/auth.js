@@ -82,7 +82,7 @@ router.post("/users", (req, res) => {
       return res.status(400).json({ error: "Ese usuario ya existe" });
     }
 
-    const roleRow = db.prepare("SELECT id FROM roles WHERE name = ?").get(role || "doctor");
+    const roleRow = db.prepare("SELECT id FROM roles WHERE name = ?").get((role || "doctor").toLowerCase());
     if (!roleRow) return res.status(400).json({ error: "Rol inválido" });
 
     const hash = bcrypt.hashSync(password, 10);
