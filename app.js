@@ -420,6 +420,16 @@ function currentSession() {
   }
 }
 
+let editingUserId = null;
+
+function cancelEdit() {
+  editingUserId = null;
+  userForm.reset();
+  document.querySelector("#userFormSubmit").textContent = "Crear usuario";
+  document.querySelector("#cancelEditButton").classList.add("hidden");
+  userAdminMessage.textContent = "";
+}
+
 async function renderUserList() {
   const session = currentSession();
   let users;
@@ -430,13 +440,17 @@ async function renderUserList() {
   users.forEach((user) => {
     const row = document.createElement("div");
     row.className = `user-row${user.active ? "" : " inactive"}`;
+    const canEdit = user.email !== defaultAdmin.email;
     const canRemove = user.email !== defaultAdmin.email && user.email !== session?.email && user.active;
     row.innerHTML = `
       <div>
         <strong>${user.fullName}</strong>
         <span>${user.email} | ${user.role} | ${user.active ? "Activo" : "Sin acceso"}</span>
       </div>
-      ${canRemove ? `<button class="small-danger-button" type="button" data-user-id="${user.id}">Quitar acceso</button>` : ""}
+      <div class="user-actions">
+        ${canEdit ? `<button class="small-edit-button" type="button" data-user-id="${user.id}" data-fullname="${user.fullName}" data-email="${user.email}" data-role="${user.role}">Editar</button>` : ""}
+        ${canRemove ? `<button class="small-danger-button" type="button" data-user-id="${user.id}">Quitar acceso</button>` : ""}
+      </div>
     `;
     fragment.appendChild(row);
   });
@@ -1328,9 +1342,11 @@ document.querySelector("#backClinicalButton").addEventListener("click", () => sh
 document.querySelector("#logoutButton").addEventListener("click", closeSession);
 document.querySelector("#closeUsersButton").addEventListener("click", () => userAdmin.classList.add("hidden"));
 manageUsersButton.addEventListener("click", async () => {
+  cancelEdit();
   await renderUserList();
   userAdmin.classList.remove("hidden");
 });
+document.querySelector("#cancelEditButton").addEventListener("click", cancelEdit);
 window.addEventListener("afterprint", () => document.body.classList.remove("print-mode"));
 
 document.addEventListener("click", (event) => {
@@ -1347,19 +1363,24 @@ document.addEventListener("click", (event) => {
 userForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = newUserEmail.value.trim().toLowerCase();
+  const body = {
+    fullName: newUserName.value.trim(),
+    email,
+    password: newUserPassword.value,
+    role: newUserRole.value,
+  };
+
+  if (editingUserId && !body.password) delete body.password;
 
   try {
-    await api("/auth/users", {
-      method: "POST",
-      body: JSON.stringify({
-        fullName: newUserName.value.trim(),
-        email,
-        password: newUserPassword.value,
-        role: newUserRole.value,
-      }),
-    });
-    userForm.reset();
-    userAdminMessage.textContent = "Usuario creado";
+    if (editingUserId) {
+      await api(`/auth/users/${editingUserId}`, { method: "PUT", body: JSON.stringify(body) });
+      userAdminMessage.textContent = "Usuario actualizado";
+    } else {
+      await api("/auth/users", { method: "POST", body: JSON.stringify(body) });
+      userAdminMessage.textContent = "Usuario creado";
+    }
+    cancelEdit();
     renderUserList();
   } catch (err) {
     userAdminMessage.textContent = err.message;
@@ -1369,6 +1390,19 @@ userForm.addEventListener("submit", async (event) => {
 userList.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-user-id]");
   if (!button) return;
+
+  if (event.target.closest(".small-edit-button")) {
+    editingUserId = button.dataset.userId;
+    newUserName.value = button.dataset.fullname;
+    newUserEmail.value = button.dataset.email;
+    newUserPassword.value = "";
+    newUserRole.value = button.dataset.role;
+    document.querySelector("#userFormSubmit").textContent = "Actualizar usuario";
+    document.querySelector("#cancelEditButton").classList.remove("hidden");
+    userAdminMessage.textContent = "";
+    newUserName.focus();
+    return;
+  }
 
   try {
     await api(`/auth/users/${button.dataset.userId}`, { method: "DELETE" });

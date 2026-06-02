@@ -96,6 +96,48 @@ router.post("/users", (req, res) => {
   }
 });
 
+router.put("/users/:id", (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "No autorizado" });
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    if (decoded.role?.toLowerCase() !== "administrador") {
+      return res.status(403).json({ error: "Solo administradores" });
+    }
+
+    const { id } = req.params;
+    const { fullName, email, password, role } = req.body;
+    const user = db.prepare("SELECT email, active FROM users WHERE id = ?").get(id);
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+    if (user.email === "admin") return res.status(400).json({ error: "No puedes editar al administrador principal" });
+
+    if (email && email !== user.email) {
+      const existing = db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(email, id);
+      if (existing) return res.status(400).json({ error: "Ese nombre de usuario ya está en uso" });
+    }
+
+    const roleRow = role ? db.prepare("SELECT id FROM roles WHERE name = ?").get(role.toLowerCase()) : null;
+    const roleId = roleRow?.id;
+
+    const updates = [];
+    const values = [];
+    if (fullName) { updates.push("full_name = ?"); values.push(fullName); }
+    if (email) { updates.push("email = ?"); values.push(email); }
+    if (password) { updates.push("password_hash = ?"); values.push(bcrypt.hashSync(password, 10)); }
+    if (roleId) { updates.push("role_id = ?"); values.push(roleId); }
+
+    if (updates.length) {
+      values.push(id);
+      db.prepare(`UPDATE users SET ${updates.join(", ")}, updated_at = datetime('now') WHERE id = ?`).run(...values);
+    }
+
+    res.json({ success: true, message: "Usuario actualizado" });
+  } catch {
+    return res.status(401).json({ error: "Token inválido" });
+  }
+});
+
 router.delete("/users/:id", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "No autorizado" });

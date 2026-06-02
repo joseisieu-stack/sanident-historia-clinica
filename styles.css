@@ -165,6 +165,23 @@ select {
   opacity: 0.62;
 }
 
+.user-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.small-edit-button {
+  border: 1px solid #b8c3ca;
+  border-radius: 8px;
+  background: #f7f9fa;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
 .small-danger-button {
   border: 1px solid #f0a8ae;
   border-radius: 8px;

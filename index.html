@@ -79,7 +79,7 @@
           <label>
             Contraseña
           <div class="password-wrap">
-            <input id="newUserPassword" type="password" placeholder="Clave de acceso" required>
+            <input id="newUserPassword" type="password" placeholder="Clave de acceso (dejar vacío para no cambiar)">
             <button class="toggle-pass" type="button" data-target="newUserPassword" aria-label="Mostrar contraseña">👁</button>
           </div>
           </label>
@@ -91,7 +91,8 @@
               <option value="Administrador">Administrador</option>
             </select>
           </label>
-          <button class="primary-button" type="submit">Crear usuario</button>
+          <button class="primary-button" type="submit" id="userFormSubmit">Crear usuario</button>
+          <button class="ghost-button compact hidden" type="button" id="cancelEditButton">Cancelar</button>
           <p id="userAdminMessage" class="login-message" aria-live="polite"></p>
         </form>
 
