@@ -22,8 +22,9 @@ router.post("/login", (req, res) => {
     return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
   }
 
+  const roleMap = { administrador: "Administrador", doctor: "Doctor", invitado: "Invitado" };
   const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role, fullName: user.full_name },
+    { id: user.id, email: user.email, role: roleMap[user.role] || user.role, fullName: user.full_name },
     SECRET,
     { expiresIn: "24h" }
   );
@@ -45,7 +46,7 @@ router.get("/users", (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET);
-    if (decoded.role !== "Administrador") {
+    if (decoded.role?.toLowerCase() !== "administrador") {
       return res.status(403).json({ error: "Solo administradores" });
     }
 
@@ -67,7 +68,7 @@ router.post("/users", (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET);
-    if (decoded.role !== "Administrador") {
+    if (decoded.role?.toLowerCase() !== "administrador") {
       return res.status(403).json({ error: "Solo administradores" });
     }
 
@@ -101,7 +102,7 @@ router.delete("/users/:id", (req, res) => {
 
   try {
     const decoded = jwt.verify(token, SECRET);
-    if (decoded.role !== "Administrador") {
+    if (decoded.role?.toLowerCase() !== "administrador") {
       return res.status(403).json({ error: "Solo administradores" });
     }
 
