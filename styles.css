@@ -1,0 +1,1295 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f7f8;
+  --surface: #ffffff;
+  --text: #172026;
+  --muted: #65717b;
+  --line: #d9e0e5;
+  --blue: #1769e0;
+  --blue-soft: #e8f1ff;
+  --red: #d92332;
+  --red-soft: #ffe8eb;
+  --green: #127c56;
+  --shadow: 0 18px 45px rgba(23, 32, 38, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: #12343f;
+}
+
+.login-screen.hidden {
+  display: none;
+}
+
+.login-card {
+  width: min(420px, 100%);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  padding: 26px;
+  display: grid;
+  gap: 14px;
+}
+
+.login-logo {
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.login-card .eyebrow {
+  color: var(--blue);
+  margin: 0;
+}
+
+.login-form {
+  display: grid;
+  gap: 12px;
+}
+
+.login-message {
+  min-height: 18px;
+  margin: 0;
+  color: var(--red);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.login-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.session-pill {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: #e6f6ef;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.user-admin {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(18, 52, 63, 0.72);
+}
+
+.user-admin-card {
+  width: min(860px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  padding: 18px;
+}
+
+.user-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.user-form button,
+.user-form .login-message {
+  align-self: end;
+}
+
+.user-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.user-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fbfcfd;
+}
+
+.user-row strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.user-row span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.user-row.inactive {
+  opacity: 0.62;
+}
+
+.small-danger-button {
+  border: 1px solid #f0a8ae;
+  border-radius: 8px;
+  background: #fff2f3;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px clamp(16px, 4vw, 44px);
+  background: #12343f;
+  color: #fff;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #b7d7df;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+}
+
+h2 {
+  font-size: 1.1rem;
+}
+
+.header-actions,
+.section-heading,
+.tool-row,
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.clinic-logo {
+  width: 78px;
+  height: 78px;
+  border: 3px solid rgba(255, 255, 255, 0.86);
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+}
+
+.header-actions,
+.section-heading {
+  justify-content: space-between;
+}
+
+.primary-button,
+.ghost-button,
+.tool-button {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: #2f9d75;
+  color: #fff;
+}
+
+#backClinicalButton {
+  background: #b894e0;
+}
+#backClinicalButton:hover {
+  background: #a67cd4;
+}
+
+.ghost-button {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+.ghost-button.compact {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.app-shell {
+  padding: 22px clamp(12px, 3vw, 32px) 36px;
+}
+
+.app-view {
+  display: none;
+}
+
+.app-view.active {
+  display: grid;
+}
+
+.patient-panel {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #34424b;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+label:nth-child(n + 5) {
+  grid-column: 1 / -1;
+}
+
+.photo-field {
+  grid-row: span 2;
+}
+
+.patient-photo-preview {
+  display: none;
+  width: 132px;
+  height: 132px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7f9fa;
+  object-fit: cover;
+}
+
+.patient-photo-preview.has-photo {
+  display: block;
+}
+
+.file-list {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: var(--muted);
+  display: block;
+  padding: 11px 12px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.patient-finder-card {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(23, 32, 38, 0.1);
+}
+
+.patient-count:empty {
+  display: none;
+}
+
+.patient-list {
+  display: grid;
+  gap: 8px;
+  max-height: 210px;
+  overflow: auto;
+}
+
+.patient-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.patient-card.active {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.patient-card strong {
+  font-size: 0.92rem;
+}
+
+.patient-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.empty-list {
+  color: var(--muted);
+  font-size: 0.86rem;
+  padding: 8px 2px;
+}
+
+.db-plan {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  padding: 12px;
+}
+
+.db-plan summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.db-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.db-grid span {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  padding: 8px 10px;
+  color: #34424b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.view-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.clinic-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.detail-card {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  padding: 14px;
+}
+
+.detail-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.detail-card h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.budget-items,
+.appointment-items {
+  display: grid;
+  gap: 8px;
+}
+
+.budget-row,
+.appointment-row {
+  display: grid;
+  gap: 8px;
+  align-items: end;
+}
+
+.budget-row {
+  grid-template-columns: minmax(0, 1fr) 130px auto;
+}
+
+.appointment-row {
+  grid-template-columns: minmax(0, 1fr) 190px auto;
+}
+
+.budget-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.icon-danger-button {
+  width: 38px;
+  min-height: 38px;
+  border: 1px solid #f0a8ae;
+  border-radius: 8px;
+  background: #fff2f3;
+  color: var(--red);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: var(--text);
+  background: #fbfcfd;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible {
+  outline: 3px solid rgba(47, 157, 117, 0.25);
+  border-color: #2f9d75;
+}
+
+.option-blue {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.option-red {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.status-pill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #edf1f3;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-pill.saved {
+  background: #e6f6ef;
+  color: var(--green);
+}
+
+.muted {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.chart-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.chart-panel.app-view {
+  max-width: none;
+}
+
+.app-view:not(.active) {
+  display: none;
+}
+
+.app-view.active {
+  display: grid;
+}
+
+.chart-actions {
+  flex-wrap: wrap;
+}
+
+.tool-row,
+.clinical-tools {
+  flex-wrap: wrap;
+}
+
+.clinical-tools {
+  display: none;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.clinical-tools.active {
+  display: grid;
+  background: #f7f9fa;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.finding-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.tool-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.danger-tool-button {
+  min-height: 42px;
+  border: 1px solid #f0a8ae;
+  border-radius: 8px;
+  background: #fff2f3;
+  color: var(--red);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.1;
+  padding: 8px 12px;
+}
+
+.danger-tool-button.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.danger-tool-button .finding-code {
+  background: rgba(217, 35, 50, 0.12);
+}
+
+.danger-tool-button.active .finding-code {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.finding-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 2px;
+}
+
+.finding-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7f9fa;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 800;
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 0.78rem;
+  line-height: 1.15;
+  padding: 8px 10px;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.finding-code {
+  min-width: 36px;
+  max-width: 48px;
+  border-radius: 6px;
+  background: rgba(18, 52, 63, 0.08);
+  color: inherit;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 5px;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.blue-chip .finding-code {
+  background: #edf1f3;
+}
+
+.red-chip .finding-code {
+  background: #edf1f3;
+}
+
+.neutral-chip .finding-code,
+.clear-chip .finding-code {
+  background: #edf1f3;
+}
+
+.finding-chip span:last-child {
+  min-width: 0;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.finding-chip.blue-chip {
+  color: var(--text);
+}
+
+.finding-chip.red-chip {
+  color: var(--text);
+}
+
+.finding-chip.active {
+  background: #12343f;
+  border-color: #12343f;
+  color: #fff;
+}
+
+.finding-chip.clear-chip {
+  color: var(--text);
+}
+
+.swatch,
+.dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.tool-x {
+  color: var(--blue);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.tool-button.active .tool-x {
+  color: #fff;
+}
+
+.blue {
+  background: var(--blue);
+}
+
+.red {
+  background: var(--red);
+}
+
+.neutral {
+  background: #fff;
+}
+
+.legend {
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.odontogram-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.odontogram-toolbar .primary-button {
+  background: #b894e0;
+}
+.odontogram-toolbar .primary-button:hover {
+  background: #a67cd4;
+}
+
+.odontogram {
+  display: grid;
+  gap: 14px;
+}
+
+.arch {
+  display: grid;
+  grid-template-columns: repeat(16, 64px);
+  gap: 8px;
+  overflow-x: auto;
+  padding: 3px 2px 8px;
+}
+
+.arch-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.temporary-section {
+  width: 100%;
+  justify-self: center;
+}
+
+.temporary-section .arch-label {
+  text-align: center;
+}
+
+.tooth {
+  position: relative;
+  width: 64px;
+  min-width: 64px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  display: grid;
+  gap: 4px;
+  padding: 5px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.tooth:hover {
+  transform: translateY(-2px);
+  border-color: #7c8b96;
+}
+
+.tooth-number {
+  position: relative;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.tooth-number.fusion-number::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 66px;
+  height: 34px;
+  border: 3px solid var(--blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+}
+
+.tooth-number.fusion-start::after {
+  transform: translate(-30%, -50%);
+}
+
+.tooth-number.fusion-end::after {
+  transform: translate(-70%, -50%);
+}
+
+.tooth-number.gemination-number::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+}
+
+.tooth-code {
+  min-height: 18px;
+  border: 1px solid #cfd8de;
+  border-radius: 4px;
+  color: var(--blue);
+  display: grid;
+  place-items: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tooth-code.red-code {
+  color: var(--red);
+}
+
+.tooth-svg {
+  width: 100%;
+  height: 78px;
+  overflow: visible;
+}
+
+.root-line {
+  fill: none;
+  stroke: #25313a;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.surface {
+  fill: #fff;
+  stroke: #25313a;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.surface:hover {
+  stroke: #2f9d75;
+  stroke-width: 3;
+}
+
+.surface.restoration,
+.surface.blue-fill {
+  fill: var(--blue);
+  stroke: var(--blue);
+}
+
+.surface.caries,
+.surface.red-fill {
+  fill: var(--red);
+  stroke: var(--red);
+}
+
+.surface.red-outline {
+  fill: #fff;
+  stroke: var(--red);
+  stroke-width: 4;
+}
+
+.tooth-overlay {
+  pointer-events: none;
+  stroke-width: 4;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tooth-overlay.blue-mark {
+  stroke: var(--blue);
+}
+
+.tooth-overlay.red-mark {
+  stroke: var(--red);
+}
+
+.tooth-symbol {
+  pointer-events: none;
+  font-size: 30px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.tooth-symbol.blue-mark {
+  fill: var(--blue);
+}
+
+.tooth-symbol.red-mark {
+  fill: var(--red);
+}
+
+.tooth-symbol.supernumerary-symbol {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.tooth.restoration {
+  background: var(--blue-soft);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.tooth.caries {
+  background: var(--red-soft);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.tooth.selected {
+  box-shadow: 0 0 0 3px rgba(18, 52, 63, 0.18);
+}
+
+.selection-box {
+  border: 1px dashed #b8c3ca;
+  border-radius: 8px;
+  padding: 12px;
+  color: #3d4a53;
+  background: #fafcfd;
+}
+
+.diagnosis-field {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.diagnosis-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.diagnosis-input-row input {
+  flex: 1;
+}
+
+.diagnosis-input-row .primary-button.compact {
+  background: #b894e0;
+  min-height: 42px;
+  padding: 10px 14px;
+  white-space: nowrap;
+}
+.diagnosis-input-row .primary-button.compact:hover {
+  background: #a67cd4;
+}
+
+.diagnosis-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.diagnosis-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f0f4ff;
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.tag-remove {
+  border: 0;
+  background: none;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0;
+}
+
+.chart-notes-panel {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(280px, 1.2fr);
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  padding: 14px;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 680px) {
+  .topbar,
+  .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .brand-block {
+    align-items: center;
+  }
+
+  .clinic-logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    flex: 1;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-form {
+    grid-template-columns: 1fr;
+  }
+
+  .clinic-detail-grid,
+  .budget-summary,
+  .budget-row,
+  .appointment-row {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .clinical-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-notes-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .tool-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .topbar {
+    padding: 0 0 10px;
+    background: #fff;
+    color: var(--text);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .clinic-logo {
+    width: 58px;
+    height: 58px;
+    border-color: var(--line);
+    box-shadow: none;
+  }
+
+  .eyebrow {
+    color: var(--muted);
+  }
+
+  .header-actions,
+  .view-actions,
+  .chart-actions,
+  .finding-panel,
+  .clinical-tools,
+  .login-screen,
+  .patient-finder-card,
+  .db-plan,
+  .legend,
+  .selection-box,
+  #saveStatus {
+    display: none !important;
+  }
+
+  .app-shell {
+    padding: 10px 0 0;
+  }
+
+  body.print-mode .app-view,
+  .app-view,
+  .app-view:not(.active) {
+    display: grid !important;
+  }
+
+  .panel {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0 0 12px;
+    break-inside: avoid;
+  }
+
+  .patient-panel,
+  .chart-panel.app-view {
+    max-width: none;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    margin-top: 10px;
+  }
+
+  .clinic-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .detail-card {
+    padding: 8px;
+    box-shadow: none;
+  }
+
+  .detail-card-header button,
+  .icon-danger-button {
+    display: none !important;
+  }
+
+  .budget-row,
+  .appointment-row {
+    grid-template-columns: minmax(0, 1fr) 110px;
+  }
+
+  .appointment-row {
+    grid-template-columns: minmax(0, 1fr) 170px;
+  }
+
+  label {
+    font-size: 0.92rem;
+    gap: 4px;
+  }
+
+  input,
+  textarea,
+  select,
+  .file-list {
+    min-height: 0;
+    border-color: #bfc9d0;
+    background: #fff;
+    padding: 6px 8px;
+    font-size: 0.92rem;
+  }
+
+  textarea {
+    height: auto;
+  }
+
+  .photo-field input,
+  #auxiliaryExamsInput {
+    display: none;
+  }
+
+  .patient-photo-preview.has-photo {
+    display: block;
+    width: 88px;
+    height: 88px;
+  }
+
+  .odontogram {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .chart-notes-panel {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px 0 0;
+    border: 0;
+    background: #fff;
+  }
+
+  .arch {
+    gap: 4px;
+    overflow: visible;
+    padding-bottom: 4px;
+  }
+
+  .tooth {
+    width: 43px;
+    min-width: 43px;
+    padding: 3px;
+    gap: 2px;
+    break-inside: avoid;
+  }
+
+  .tooth-svg {
+    height: 58px;
+  }
+
+  .tooth-code {
+    min-height: 14px;
+    font-size: 0.6rem;
+  }
+
+  .tooth-number {
+    font-size: 0.7rem;
+  }
+
+  .muted {
+    display: none;
+  }
+}

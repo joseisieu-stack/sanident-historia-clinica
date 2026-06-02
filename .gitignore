@@ -1,0 +1,5 @@
+node_modules/
+backend/sanident.db
+backend/uploads/
+.env
+.DS_Store

@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Historia clinica Sani Dent</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
+      <div class="login-card">
+        <img class="login-logo" src="images/logo-del-consul.jpeg" alt="Logo Sani Dent">
+        <p class="eyebrow">Acceso seguro</p>
+        <h1 id="loginTitle">Sani Dent</h1>
+        <form id="loginForm" class="login-form">
+          <label>
+            Usuario
+            <input id="loginUser" type="text" autocomplete="username" placeholder="Usuario o correo" required>
+          </label>
+          <label>
+            Contraseña
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Contraseña" required>
+          </label>
+          <label>
+            Rol asignado
+            <select id="loginRole">
+              <option value="Administrador">Administrador</option>
+              <option value="Doctor">Doctor</option>
+              <option value="Invitado">Invitado</option>
+            </select>
+          </label>
+          <button class="primary-button" type="submit">Ingresar</button>
+          <p id="loginMessage" class="login-message" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <header class="topbar">
+      <div class="brand-block">
+        <img class="clinic-logo" src="images/logo-del-consul.jpeg" alt="Logo Sani Dent">
+        <div>
+          <p class="eyebrow">Consulta odontologica</p>
+          <h1>Historia clinica Sani Dent</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="sessionUser" class="session-pill"></span>
+        <button class="ghost-button hidden" id="manageUsersButton" type="button">Usuarios</button>
+        <button class="ghost-button" id="clearButton" type="button">Nuevo registro</button>
+        <button class="ghost-button" id="printButton" type="button">Imprimir PDF</button>
+        <button class="primary-button" id="saveButton" type="button">Guardar</button>
+        <button class="ghost-button" id="logoutButton" type="button">Salir</button>
+      </div>
+    </header>
+
+    <section class="user-admin hidden" id="userAdmin" aria-labelledby="userAdminTitle">
+      <div class="user-admin-card">
+        <div class="section-heading">
+          <div>
+            <h2 id="userAdminTitle">Administrar usuarios</h2>
+            <p class="muted">Crea accesos para doctores e invitados. Quitar acceso no borra pacientes ni historias.</p>
+          </div>
+          <button class="ghost-button compact" id="closeUsersButton" type="button">Cerrar</button>
+        </div>
+
+        <form id="userForm" class="user-form">
+          <label>
+            Nombre completo
+            <input id="newUserName" placeholder="Nombre del doctor" required>
+          </label>
+          <label>
+            Usuario / correo
+            <input id="newUserEmail" type="text" placeholder="Nombre de usuario" required>
+          </label>
+          <label>
+            Contraseña
+            <input id="newUserPassword" type="password" placeholder="Clave de acceso" required>
+          </label>
+          <label>
+            Rol
+            <select id="newUserRole">
+              <option value="Doctor">Doctor</option>
+              <option value="Invitado">Invitado</option>
+              <option value="Administrador">Administrador</option>
+            </select>
+          </label>
+          <button class="primary-button" type="submit">Crear usuario</button>
+          <p id="userAdminMessage" class="login-message" aria-live="polite"></p>
+        </form>
+
+        <div id="userList" class="user-list"></div>
+      </div>
+    </section>
+
+    <main class="app-shell">
+      <section class="panel patient-panel app-view active" id="clinicalView" aria-labelledby="patientTitle">
+        <div class="section-heading">
+          <h2 id="patientTitle">Historia clinica</h2>
+          <span id="saveStatus" class="status-pill">Sin guardar</span>
+        </div>
+
+        <section class="patient-finder-card" aria-label="Buscar paciente">
+          <span id="patientCount" class="patient-count" aria-live="polite"></span>
+          <input id="patientSearch" type="search" placeholder="Buscar paciente atendido">
+          <div id="patientList" class="patient-list"></div>
+        </section>
+
+        <form id="clinicalForm" class="form-grid">
+          <label>
+            Nombres y apellidos
+            <input name="fullName" autocomplete="name" placeholder="Paciente">
+          </label>
+          <label>
+            Documento
+            <input name="documentId" inputmode="numeric" placeholder="DNI / ID">
+          </label>
+          <label>
+            Fecha de nacimiento
+            <input name="birthDate" type="date">
+          </label>
+          <label>
+            Telefono
+            <input name="phone" inputmode="tel" autocomplete="tel" placeholder="+51">
+          </label>
+          <label class="photo-field">
+            Foto del paciente
+            <input id="patientPhotoInput" type="file" accept="image/*">
+            <img id="patientPhotoPreview" class="patient-photo-preview" alt="Foto del paciente">
+          </label>
+          <label>
+            Examenes auxiliares
+            <input id="auxiliaryExamsInput" type="file" multiple>
+            <span id="examList" class="file-list">Sin archivos cargados</span>
+          </label>
+          <label>
+            Motivo de consulta
+            <textarea name="reason" rows="3" placeholder="Dolor, control, estetica..."></textarea>
+          </label>
+          <label>
+            Antecedentes medicos
+            <textarea name="medicalHistory" rows="3" placeholder="Alergias, enfermedades, medicacion..."></textarea>
+          </label>
+          <label>
+            Diagnostico
+            <textarea name="diagnosis" rows="3" placeholder="Hallazgos clinicos"></textarea>
+          </label>
+          <label>
+            Plan de tratamiento
+            <textarea name="treatmentPlan" rows="3" placeholder="Procedimientos indicados"></textarea>
+          </label>
+        </form>
+
+        <section class="clinic-detail-grid">
+          <div class="detail-card" aria-label="Presupuesto del paciente">
+            <div class="detail-card-header">
+              <h3>Presupuesto</h3>
+              <button class="ghost-button compact" id="addBudgetItemButton" type="button">Agregar tratamiento</button>
+            </div>
+            <div id="budgetItems" class="budget-items"></div>
+            <div class="budget-summary">
+              <label>
+                Total
+                <input id="budgetTotal" type="number" min="0" step="0.01" readonly>
+              </label>
+              <label>
+                Adelanto
+                <input id="budgetAdvance" type="number" min="0" step="0.01" placeholder="0.00">
+              </label>
+              <label>
+                Resta por pagar
+                <input id="budgetBalance" type="number" min="0" step="0.01" readonly>
+              </label>
+            </div>
+          </div>
+
+          <div class="detail-card" aria-label="Proximas citas del paciente">
+            <div class="detail-card-header">
+              <h3>Proximas citas</h3>
+              <button class="ghost-button compact" id="addAppointmentButton" type="button">Agregar cita</button>
+            </div>
+            <div id="appointmentItems" class="appointment-items"></div>
+          </div>
+        </section>
+
+        <div class="view-actions">
+          <button class="primary-button" id="openChartButton" type="button">Abrir odontograma</button>
+        </div>
+
+      </section>
+
+      <section class="panel chart-panel app-view" id="chartView" aria-labelledby="chartTitle">
+        <div class="section-heading">
+          <div>
+            <h2 id="chartTitle">Odontograma</h2>
+            <p class="muted">Selecciona un tipo de registro y toca una pieza dental.</p>
+          </div>
+          <div class="header-actions chart-actions">
+            <button class="primary-button" id="backClinicalButton" type="button">Volver a historia</button>
+          </div>
+        </div>
+
+        <div class="finding-panel" aria-label="Herramientas del odontograma">
+          <div class="tool-heading">
+            <div class="arch-label">Herramientas y hallazgos</div>
+          </div>
+          <div id="findingQuickButtons" class="finding-grid"></div>
+        </div>
+
+        <div class="clinical-tools option-panel" id="restorationOptions">
+          <label>
+            Tipo de restauracion
+            <select id="restorationDetail">
+              <option value="restoration-good">Restauracion definitiva en buen estado</option>
+              <option value="restoration-bad">Restauracion definitiva en mal estado</option>
+              <option value="restoration-temp">Restauracion temporal</option>
+              <option value="wear">Superficie desgastada (DES)</option>
+            </select>
+          </label>
+          <label>
+            Material restaurador
+            <select id="restorationMaterial">
+              <option value="R">Resina (R)</option>
+              <option value="AM">Amalgama dental (AM)</option>
+              <option value="IV">Ionomero de vidrio (IV)</option>
+              <option value="IM">Incrustacion metalica (IM)</option>
+              <option value="IE">Incrustacion estetica (IE)</option>
+              <option value="C">Carilla (C)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="cariesOptions">
+          <label>
+            Tipo de caries
+            <select id="cariesDetail">
+              <option value="caries-mb">Mancha blanca (MB)</option>
+              <option value="caries-enamel">Caries en esmalte (CE)</option>
+              <option value="caries-dentin">Caries en dentina (CD)</option>
+              <option value="caries-pulp">Caries con compromiso pulpar (CDP)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="missingOptions">
+          <label>
+            Tipo de ausencia
+            <select id="missingReason">
+              <option value="missing-dne">Diente no erupcionado (DNE)</option>
+              <option value="missing-dex">Ausente por extraccion/caries (DEX)</option>
+              <option value="missing-dao">Ausente por otras razones (DAO)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="crownOptions">
+          <label>
+            Tipo de corona
+            <select id="crownType">
+              <option value="CM">Corona metalica (CM)</option>
+              <option value="CF">Corona fenestrada (CF)</option>
+              <option value="CMC">Corona metal ceramica (CMC)</option>
+              <option value="CV">Corona veneer (CV)</option>
+              <option value="CLM">Corona libre de metal (CLM)</option>
+              <option class="option-red" value="CT">Corona temporal (CT)</option>
+            </select>
+          </label>
+          <label>
+            Estado de corona
+            <select id="crownStatus">
+              <option class="option-blue" value="blue">Buen estado - azul</option>
+              <option class="option-red" value="red">Mal estado - rojo</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="orthoOptions">
+          <label>
+            Tipo de aparato ortodontico
+            <select id="orthoChoice">
+              <option class="option-blue" value="ortho-fixed-good">Fijo en buen estado - azul</option>
+              <option class="option-red" value="ortho-fixed-bad">Fijo en mal estado - rojo</option>
+              <option class="option-blue" value="ortho-removable-good">Removible en buen estado - azul</option>
+              <option class="option-red" value="ortho-removable-bad">Removible en mal estado - rojo</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="statusOptions">
+          <label>
+            Estado
+            <select id="treatmentStatus">
+              <option class="option-blue" value="blue">Buen estado - azul</option>
+              <option class="option-red" value="red">Mal estado - rojo</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="mobilityOptions">
+          <label>
+            Grado de movilidad
+            <select id="mobilityGrade">
+              <option class="option-red" value="1">Grado 1 - rojo</option>
+              <option class="option-red" value="2">Grado 2 - rojo</option>
+              <option class="option-red" value="3">Grado 3 - rojo</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="fractureOptions">
+          <label>
+            Tipo de fractura
+            <select id="fractureType">
+              <option class="option-red" value="root">Fractura de raiz - linea roja en raiz</option>
+              <option class="option-red" value="crown">Fractura de corona - linea transversal roja</option>
+              <option class="option-red" value="angle">Fractura de angulo - linea roja en angulo coronario</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="supernumeraryOptions">
+          <label>
+            Ubicacion del supernumerario
+            <select id="supernumerarySide">
+              <option value="right">Derecha de la raiz</option>
+              <option value="left">Izquierda de la raiz</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="clinical-tools option-panel" id="positionOptions">
+          <label>
+            Tipo de posicion anomal dentaria
+            <select id="positionType">
+              <option value="M">M: Mesializado</option>
+              <option value="D">D: Distalizado</option>
+              <option value="V">V: Vestibularizado</option>
+              <option value="P">P: Palatinizado</option>
+              <option value="L">L: Lingualizado</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="legend" aria-label="Leyenda">
+          <span><b class="dot blue"></b>Azul: restauraciones</span>
+          <span><b class="dot red"></b>Rojo: caries</span>
+          <span><b class="dot neutral"></b>Click en una superficie para registrar</span>
+        </div>
+
+        <div class="odontogram-toolbar">
+          <button class="primary-button" id="eraseSurfaceButton" type="button">Borrar superficie</button>
+          <button class="primary-button" id="resetChartButton" type="button">Limpiar odontograma</button>
+        </div>
+
+        <div id="odontogram" class="odontogram" aria-label="Odontograma interactivo"></div>
+
+        <aside class="selection-box" aria-live="polite">
+          <strong>Pieza seleccionada:</strong>
+          <span id="selectedTooth">Ninguna</span>
+        </aside>
+
+        <section class="chart-notes-panel" aria-label="Diagnostico y observaciones del odontograma">
+          <div class="diagnosis-field">
+            <label>Diagnostico o procedimiento</label>
+            <div class="diagnosis-input-row">
+              <input id="chartDiagnosis" list="diagnosisOptions" placeholder="Escribe y presiona Enter">
+              <button class="primary-button compact" id="addDiagnosisButton" type="button">Agregar</button>
+            </div>
+            <datalist id="diagnosisOptions">
+              <option value="K05.0: Gingivitis aguda"></option>
+              <option value="K05.1: Gingivitis cronica"></option>
+              <option value="K05.3: Periodontitis cronica"></option>
+              <option value="K03.6: Depositos [acreciones] en los dientes"></option>
+              <option value="K02.0: Caries limitada al esmalte (mancha blanca)"></option>
+              <option value="K02.1: Caries de la dentina"></option>
+              <option value="K02.2: Caries del cemento"></option>
+              <option value="K02.8: Otras caries dentales"></option>
+              <option value="K04.0: Pulpitis"></option>
+              <option value="K04.1: Necrosis de la pulpa"></option>
+              <option value="K04.4: Periodontitis apical aguda"></option>
+              <option value="K04.5: Periodontitis apical cronica"></option>
+              <option value="K04.6: Absceso periapical con cavidad"></option>
+              <option value="K08.1: Perdida de dientes por accidente, extraccion o enfermedad periodontal"></option>
+              <option value="K08.8: Otras alteraciones especificadas de los dientes y estructuras de sosten"></option>
+              <option value="U0001: Examen estomatologico / Consulta odontologica"></option>
+              <option value="U0002: Profilaxis dental"></option>
+              <option value="U0004: Aplicacion de barniz de fluor"></option>
+              <option value="U0006: Sellante de surcos y fisuras"></option>
+              <option value="U0007: Obturacion con resina (curacion)"></option>
+              <option value="U0009: Tratamiento de pulpotomia"></option>
+              <option value="U0017: Exodoncia (extraccion) simple"></option>
+            </datalist>
+            <div id="diagnosisTags" class="diagnosis-tags"></div>
+          </div>
+          <label>
+            Observaciones del odontograma
+            <textarea id="chartObservations" rows="4" placeholder="Escribe observaciones clinicas del odontograma"></textarea>
+          </label>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
