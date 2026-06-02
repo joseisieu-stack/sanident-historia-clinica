@@ -413,7 +413,8 @@ function currentSession() {
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    return { email: payload.email, role: payload.role, fullName: payload.fullName };
+    const roleMap = { administrador: "Administrador", doctor: "Doctor", invitado: "Invitado" };
+    return { email: payload.email, role: roleMap[payload.role] || payload.role, fullName: payload.fullName };
   } catch {
     return null;
   }
