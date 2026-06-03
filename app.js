@@ -398,7 +398,8 @@ function createUserId() {
 
 async function readUsers() {
   try {
-    return await api("/auth/users");
+    const users = await api("/auth/users");
+    return users.map((u) => ({ id: u.id, fullName: u.full_name, email: u.email, role: u.role, active: u.active }));
   } catch {
     return [];
   }
