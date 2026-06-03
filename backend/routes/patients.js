@@ -1,6 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const db = require("../db");
+const { query } = require("../db");
 
 const router = express.Router();
 const SECRET = process.env.JWT_SECRET || "sanident-secret-key-cambiar-en-produccion";
@@ -16,41 +16,51 @@ function auth(req, res, next) {
   }
 }
 
-router.get("/", auth, (req, res) => {
-  const search = (req.query.search || "").trim().toLowerCase();
-  let patients;
-  if (search) {
-    patients = db.prepare(`
-      SELECT id, full_name, document_id, phone, created_at
-      FROM patients
-      WHERE LOWER(full_name) LIKE ? OR document_id LIKE ? OR phone LIKE ?
-      ORDER BY updated_at DESC
-    `).all(`%${search}%`, `%${search}%`, `%${search}%`);
-  } else {
-    patients = db.prepare(`
-      SELECT id, full_name, document_id, phone, created_at
-      FROM patients ORDER BY updated_at DESC LIMIT 50
-    `).all();
+router.get("/", auth, async (req, res) => {
+  try {
+    const search = (req.query.search || "").trim().toLowerCase();
+    let rows;
+    if (search) {
+      const result = await query(`
+        SELECT id, full_name, document_id, phone, created_at
+        FROM patients
+        WHERE LOWER(full_name) LIKE $1 OR document_id LIKE $1 OR phone LIKE $1
+        ORDER BY updated_at DESC
+      `, [`%${search}%`]);
+      rows = result.rows;
+    } else {
+      const result = await query(`
+        SELECT id, full_name, document_id, phone, created_at
+        FROM patients ORDER BY updated_at DESC LIMIT 50
+      `);
+      rows = result.rows;
+    }
+    res.json(rows.map((p) => ({
+      id: String(p.id),
+      fullName: p.full_name,
+      documentId: p.document_id || "",
+      phone: p.phone || "",
+      savedAt: p.created_at,
+    })));
+  } catch (err) {
+    res.status(500).json({ error: "Error del servidor" });
   }
-  res.json(patients.map((p) => ({
-    id: String(p.id),
-    fullName: p.full_name,
-    documentId: p.document_id || "",
-    phone: p.phone || "",
-    savedAt: p.created_at,
-  })));
 });
 
-router.post("/", auth, (req, res) => {
-  const { fullName, documentId, phone } = req.body;
-  if (!fullName) return res.status(400).json({ error: "Nombre requerido" });
+router.post("/", auth, async (req, res) => {
+  try {
+    const { fullName, documentId, phone } = req.body;
+    if (!fullName) return res.status(400).json({ error: "Nombre requerido" });
 
-  const result = db.prepare(`
-    INSERT INTO patients (created_by_user_id, full_name, document_id, phone)
-    VALUES (?, ?, ?, ?)
-  `).run(req.user.id, fullName, documentId || "", phone || "");
+    const result = await query(
+      `INSERT INTO patients (created_by_user_id, full_name, document_id, phone) VALUES ($1, $2, $3, $4) RETURNING id`,
+      [req.user.id, fullName, documentId || "", phone || ""]
+    );
 
-  res.json({ id: String(result.lastInsertRowid), success: true });
+    res.json({ id: String(result.rows[0].id), success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Error del servidor" });
+  }
 });
 
 module.exports = router;

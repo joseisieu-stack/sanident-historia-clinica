@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+const { migrate } = require("./db");
 
 const authRoutes = require("./routes/auth");
 const patientRoutes = require("./routes/patients");
@@ -25,6 +26,8 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Sanident backend running on http://localhost:${PORT}`);
+migrate().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Sanident backend running on http://localhost:${PORT}`);
+  });
 });
