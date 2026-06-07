@@ -104,6 +104,7 @@ const state = {
   pendingSpanStart: "",
   selectedTooth: "",
   chart: {},
+  ortho: null,
 };
 
 const API_URL = localStorage.getItem("sanident.apiUrl") || "http://localhost:3000/api";
@@ -182,6 +183,9 @@ const patientPhotoInput = document.querySelector("#patientPhotoInput");
 const patientPhotoPreview = document.querySelector("#patientPhotoPreview");
 const auxiliaryExamsInput = document.querySelector("#auxiliaryExamsInput");
 const examList = document.querySelector("#examList");
+const orthoInstallationDate = document.querySelector("#orthoInstallationDate");
+const orthoTableBody = document.querySelector("#orthoTableBody");
+const addOrthoControlButton = document.querySelector("#addOrthoControlButton");
 const restorationDetail = document.querySelector("#restorationDetail");
 const cariesDetail = document.querySelector("#cariesDetail");
 const restorationMaterial = document.querySelector("#restorationMaterial");
@@ -554,6 +558,131 @@ function fillChartNotes(notes = {}) {
   diagnosisList = notes.diagnosis ? notes.diagnosis.split(",").map((s) => s.trim()).filter(Boolean) : [];
   renderDiagnosisTags();
   chartObservations.value = notes.observations || "";
+}
+
+function getOrthoData() {
+  const installationDate = orthoInstallationDate.value;
+  const controls = [];
+  const rows = orthoTableBody.querySelectorAll("tr");
+  rows.forEach((row) => {
+    const id = row.dataset.id;
+    const expected = row.querySelector(".ortho-expected")?.value || "";
+    const attended = row.dataset.attended === "true" ? true : row.dataset.attended === "false" ? false : null;
+    const attendedDate = row.querySelector(".ortho-expected")?.value || "";
+    const procedures = row.querySelector(".ortho-proc")?.value || "";
+    const approval = row.querySelector(".approve-check")?.checked || false;
+    controls.push({ id: Number(id), expectedDate: expected, attended, attendedDate, procedures, approval });
+  });
+  return installationDate ? { installationDate, controls } : null;
+}
+
+function renderOrthodontics(data) {
+  if (!data || !data.installationDate) {
+    orthoInstallationDate.value = "";
+    orthoTableBody.innerHTML = "";
+    state.ortho = null;
+    return;
+  }
+  orthoInstallationDate.value = data.installationDate;
+  state.ortho = data;
+  renderOrthoControls(data.controls || []);
+}
+
+function renderOrthoControls(controls) {
+  orthoTableBody.innerHTML = "";
+  if (!controls.length) return;
+  controls.forEach((c) => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = c.id;
+    tr.dataset.attended = c.attended === null ? "" : String(c.attended);
+    tr.innerHTML = `
+      <td class="col-num">${c.id}</td>
+      <td class="col-date"><input class="ortho-expected" type="date" value="${c.expectedDate || ""}"></td>
+      <td class="col-comp">${complianceBadge(c)}</td>
+      <td class="col-proc"><input class="ortho-proc" type="text" value="${escapeHtml(c.procedures || "")}" placeholder="Procedimiento"></td>
+      <td class="col-approve"><input class="approve-check" type="checkbox" ${c.approval ? "checked" : ""}></td>
+      <td class="col-action"><button class="delete-control" type="button" title="Eliminar control">X</button></td>
+    `;
+    orthoTableBody.appendChild(tr);
+  });
+  bindOrthoRowEvents();
+}
+
+function complianceBadge(c) {
+  if (c.attended === true) return '<span class="comp-badge yes" data-action="toggle">Sí</span>';
+  if (c.attended === false) return '<span class="comp-badge no" data-action="toggle">No</span>';
+  return '<span class="comp-badge pending" data-action="toggle">Pendiente</span>';
+}
+
+function bindOrthoRowEvents() {
+  orthoTableBody.querySelectorAll(".comp-badge").forEach((badge) => {
+    badge.addEventListener("click", (e) => {
+      const tr = e.currentTarget.closest("tr");
+      const current = tr.dataset.attended;
+      if (current === "true") {
+        tr.dataset.attended = "false";
+      } else if (current === "false") {
+        tr.dataset.attended = "";
+      } else {
+        tr.dataset.attended = "true";
+      }
+      const id = Number(tr.dataset.id);
+      const control = state.ortho?.controls?.find((c) => c.id === id);
+      if (control) {
+        control.attended = tr.dataset.attended === "true" ? true : tr.dataset.attended === "false" ? false : null;
+      }
+      tr.querySelector(".col-comp").innerHTML = complianceBadge({
+        attended: tr.dataset.attended === "true" ? true : tr.dataset.attended === "false" ? false : null,
+      });
+      setDirty();
+    });
+  });
+  orthoTableBody.querySelectorAll(".ortho-expected").forEach((inp) => {
+    inp.addEventListener("change", () => setDirty());
+  });
+  orthoTableBody.querySelectorAll(".ortho-proc").forEach((inp) => {
+    inp.addEventListener("input", () => setDirty());
+  });
+  orthoTableBody.querySelectorAll(".approve-check").forEach((chk) => {
+    chk.addEventListener("change", () => setDirty());
+  });
+  orthoTableBody.querySelectorAll(".delete-control").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const tr = e.currentTarget.closest("tr");
+      const id = Number(tr.dataset.id);
+      if (state.ortho?.controls) {
+        state.ortho.controls = state.ortho.controls.filter((c) => c.id !== id);
+        renderOrthoControls(state.ortho.controls);
+      }
+      setDirty();
+    });
+  });
+}
+
+function generateOrthoControls(installationDate, existingControls) {
+  const controls = [];
+  const start = new Date(installationDate);
+  const existingMap = {};
+  if (existingControls) {
+    existingControls.forEach((c) => { existingMap[c.id] = c; });
+  }
+  for (let i = 1; i <= 24; i++) {
+    const d = new Date(start);
+    d.setMonth(d.getMonth() + i);
+    const expected = d.toISOString().slice(0, 10);
+    if (existingMap[i]) {
+      controls.push({ ...existingMap[i], id: i });
+    } else {
+      controls.push({ id: i, expectedDate: expected, attended: null, attendedDate: expected, procedures: "", approval: false });
+    }
+  }
+  return controls;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 function createBudgetRow(item = {}) {
@@ -966,6 +1095,7 @@ async function saveRecord() {
     appointments: getAppointmentsData(),
     chart: state.chart,
     chartNotes: getChartNotes(),
+    ortho: getOrthoData(),
     savedAt: new Date().toISOString(),
   };
 
@@ -1003,6 +1133,7 @@ async function loadRecord(id = "") {
     fillAppointmentsData(payload.appointments || []);
     state.chart = payload.chart || {};
     fillChartNotes(payload.chartNotes);
+    renderOrthodontics(payload.ortho);
     renderPatientPhoto();
     renderExamList();
     refreshToothStyles();
@@ -1455,6 +1586,39 @@ document.querySelector("#clearButton").addEventListener("click", () => {
   renderExamList();
   renderPatientList();
   refreshToothStyles();
+  state.ortho = null;
+  orthoInstallationDate.value = "";
+  orthoTableBody.innerHTML = "";
+  setDirty();
+});
+
+orthoInstallationDate.addEventListener("change", () => {
+  const date = orthoInstallationDate.value;
+  if (date) {
+    state.ortho = { installationDate: date, controls: generateOrthoControls(date, state.ortho?.controls) };
+    renderOrthoControls(state.ortho.controls);
+  } else {
+    state.ortho = null;
+    orthoTableBody.innerHTML = "";
+  }
+  setDirty();
+});
+
+addOrthoControlButton.addEventListener("click", () => {
+  if (!state.ortho) return;
+  const maxId = state.ortho.controls.reduce((m, c) => Math.max(m, c.id), 0);
+  const newId = maxId + 1;
+  let expectedDate = "";
+  if (state.ortho.controls.length) {
+    const last = state.ortho.controls[state.ortho.controls.length - 1];
+    if (last.expectedDate) {
+      const d = new Date(last.expectedDate);
+      d.setMonth(d.getMonth() + 1);
+      expectedDate = d.toISOString().slice(0, 10);
+    }
+  }
+  state.ortho.controls.push({ id: newId, expectedDate, attended: null, attendedDate: expectedDate, procedures: "", approval: false });
+  renderOrthoControls(state.ortho.controls);
   setDirty();
 });
 

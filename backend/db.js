@@ -66,10 +66,14 @@ async function migrate() {
       chart_json TEXT,
       chart_diagnosis TEXT,
       chart_observations TEXT,
+      ortho_json TEXT,
       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
   `);
+
+  // Add ortho_json column if upgrading existing table
+  await query(`ALTER TABLE clinical_records ADD COLUMN IF NOT EXISTS ortho_json TEXT`);
 
   await query(`
     CREATE TABLE IF NOT EXISTS patient_files (

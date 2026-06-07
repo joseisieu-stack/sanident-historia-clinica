@@ -190,6 +190,32 @@
           </div>
         </section>
 
+        <section class="ortho-card" aria-label="Paciente con Ortodoncia">
+          <div class="detail-card-header">
+            <h3>Paciente con Ortodoncia</h3>
+          </div>
+          <label>
+            Fecha de instalacion de brackets
+            <input id="orthoInstallationDate" type="date">
+          </label>
+          <div class="ortho-scroll">
+            <table class="ortho-table">
+              <thead>
+                <tr>
+                  <th class="col-num">N°</th>
+                  <th class="col-date">Fecha de control</th>
+                  <th class="col-comp">¿Cumplio?</th>
+                  <th class="col-proc">Procedimientos realizados</th>
+                  <th class="col-approve">V°B°</th>
+                  <th class="col-action"></th>
+                </tr>
+              </thead>
+              <tbody id="orthoTableBody"></tbody>
+            </table>
+          </div>
+          <button class="ghost-button compact" id="addOrthoControlButton" type="button">Agregar control</button>
+        </section>
+
         <div class="view-actions">
           <button class="primary-button" id="openChartButton" type="button">Abrir odontograma</button>
         </div>

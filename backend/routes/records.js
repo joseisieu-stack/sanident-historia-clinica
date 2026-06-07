@@ -46,6 +46,7 @@ router.get("/:patientId", auth, async (req, res) => {
         diagnosis: record.chart_diagnosis || "",
         observations: record.chart_observations || "",
       },
+      ortho: record.ortho_json ? JSON.parse(record.ortho_json) : null,
       savedAt: record.created_at,
     });
   } catch (err) {
@@ -92,6 +93,7 @@ router.post("/:patientId", auth, async (req, res) => {
       chart_json: JSON.stringify(data.chart || {}),
       chart_diagnosis: data.chartNotes?.diagnosis || "",
       chart_observations: data.chartNotes?.observations || "",
+      ortho_json: JSON.stringify(data.ortho || {}),
     };
 
     if (existing) {
