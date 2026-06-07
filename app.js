@@ -1605,7 +1605,7 @@ orthoInstallationDate.addEventListener("change", () => {
 });
 
 addOrthoControlButton.addEventListener("click", () => {
-  if (!state.ortho) return;
+  if (!state.ortho) state.ortho = { installationDate: "", controls: [] };
   const maxId = state.ortho.controls.reduce((m, c) => Math.max(m, c.id), 0);
   const newId = maxId + 1;
   let expectedDate = "";
