@@ -102,16 +102,16 @@
 
     <main class="app-shell">
       <section class="panel patient-panel app-view active" id="clinicalView" aria-labelledby="patientTitle">
-        <div class="section-heading">
-          <h2 id="patientTitle">Historia clinica</h2>
-          <span id="saveStatus" class="status-pill">Sin guardar</span>
-        </div>
-
         <section class="patient-finder-card" aria-label="Buscar paciente">
           <span id="patientCount" class="patient-count" aria-live="polite"></span>
           <input id="patientSearch" type="search" placeholder="Buscar paciente atendido">
           <div id="patientList" class="patient-list"></div>
         </section>
+
+        <div class="section-heading">
+          <h2 id="patientTitle">Historia clinica</h2>
+          <span id="saveStatus" class="status-pill">Sin guardar</span>
+        </div>
 
         <form id="clinicalForm" class="form-grid">
           <label>
