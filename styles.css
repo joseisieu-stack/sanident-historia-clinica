@@ -727,11 +727,13 @@ button:focus-visible {
 }
 
 .blue-chip .finding-code {
-  background: #edf1f3;
+  background: #b894e0;
+  color: #fff;
 }
 
 .red-chip .finding-code {
-  background: #edf1f3;
+  background: #e57373;
+  color: #fff;
 }
 
 .neutral-chip .finding-code,
