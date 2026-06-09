@@ -573,17 +573,17 @@ function getOrthoData() {
     const approval = row.querySelector(".approve-check")?.checked || false;
     controls.push({ id: Number(id), expectedDate: expected, attended, attendedDate, procedures, approval });
   });
-  return installationDate ? { installationDate, controls } : null;
+  return installationDate || controls.length ? { installationDate, controls } : null;
 }
 
 function renderOrthodontics(data) {
-  if (!data || !data.installationDate) {
+  if (!data || (!data.installationDate && !data.controls?.length)) {
     orthoInstallationDate.value = "";
     orthoTableBody.innerHTML = "";
     state.ortho = null;
     return;
   }
-  orthoInstallationDate.value = data.installationDate;
+  orthoInstallationDate.value = data.installationDate || "";
   state.ortho = data;
   renderOrthoControls(data.controls || []);
 }
@@ -1107,7 +1107,8 @@ async function saveRecord() {
     saveStatus.textContent = "Guardado en la nube";
     saveStatus.classList.add("saved");
   } catch (err) {
-    saveStatus.textContent = "Error al guardar";
+    console.error("Error al guardar:", err);
+    saveStatus.textContent = "Error: " + (err.message || "desconocido");
     saveStatus.classList.remove("saved");
   }
 }
