@@ -54,6 +54,7 @@ select {
   padding: 26px;
   display: grid;
   gap: 14px;
+  position: relative;
 }
 
 .login-logo {
@@ -90,12 +91,16 @@ select {
 }
 
 .login-loading {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 16px 0 8px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 8px;
+  z-index: 20;
 }
 
 .loading-track {
