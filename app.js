@@ -1072,7 +1072,21 @@ function renderPatientList() {
     patientCount.textContent = `${patients.length} paciente${patients.length === 1 ? "" : "s"}`;
 
     if (!patients.length) {
-      patientList.innerHTML = `<div class="empty-list">No hay pacientes encontrados.</div>`;
+      patientList.innerHTML = `
+        <div class="empty-list">No hay pacientes encontrados.</div>
+        <button class="primary-button" type="button" id="createPatientBtn">Crear nuevo paciente</button>
+      `;
+      const createBtn = patientList.querySelector("#createPatientBtn");
+      if (createBtn) {
+        createBtn.addEventListener("click", () => {
+          currentPatientId = createPatientId();
+          form.reset();
+          document.querySelector("#clinicalForm input[name='fullName']").value = patientSearch.value.trim();
+          patientList.innerHTML = "";
+          patientCount.textContent = "";
+          setDirty();
+        });
+      }
       return;
     }
 
