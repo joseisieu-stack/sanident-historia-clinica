@@ -1592,6 +1592,15 @@ auxiliaryExamsInput.addEventListener("change", () => {
 });
 
 document.querySelector("#clearButton").addEventListener("click", () => {
+  if (isNewPatient) {
+    const name = fullNameInput.value.trim();
+    currentPatientId = createPatientId();
+    isNewPatient = false;
+    clearButton.classList.remove("can-create");
+    showToast("Paciente nuevo listo para guardar");
+    setDirty();
+    return;
+  }
   currentPatientId = "";
   form.reset();
   patientPhotoInput.value = "";
@@ -1647,35 +1656,20 @@ addOrthoControlButton.addEventListener("click", () => {
 patientSearch.addEventListener("input", renderPatientList);
 
 const fullNameInput = document.querySelector("#clinicalForm input[name='fullName']");
-let createNewBtn = null;
+let isNewPatient = false;
 
 fullNameInput.addEventListener("input", async () => {
   const name = fullNameInput.value.trim();
-  const existingBtn = document.querySelector("#createNewPatientBtn");
-  if (existingBtn) existingBtn.remove();
+  clearButton.classList.remove("can-create");
 
-  if (name.length < 3) return;
+  if (name.length < 3) { isNewPatient = false; return; }
 
   const patients = await searchPatients(name);
-  if (patients.length) return;
+  if (patients.length) { isNewPatient = false; return; }
   if (fullNameInput.value.trim() !== name) return;
 
-  const btn = document.createElement("button");
-  btn.id = "createNewPatientBtn";
-  btn.className = "primary-button";
-  btn.type = "button";
-  btn.textContent = `Crear nuevo paciente`;
-  btn.style.marginTop = "6px";
-  fullNameInput.parentNode.appendChild(btn);
-  createNewBtn = btn;
-
-  btn.addEventListener("click", () => {
-    currentPatientId = createPatientId();
-    btn.remove();
-    createNewBtn = null;
-    setDirty();
-    showToast("Paciente nuevo listo para guardar");
-  });
+  isNewPatient = true;
+  clearButton.classList.add("can-create");
 });
 
 patientList.addEventListener("click", async (event) => {
