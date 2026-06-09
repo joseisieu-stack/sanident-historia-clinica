@@ -1072,21 +1072,7 @@ function renderPatientList() {
     patientCount.textContent = `${patients.length} paciente${patients.length === 1 ? "" : "s"}`;
 
     if (!patients.length) {
-      patientList.innerHTML = `
-        <div class="empty-list">No hay pacientes encontrados.</div>
-        <button class="primary-button" type="button" id="createPatientBtn">Crear nuevo paciente</button>
-      `;
-      const createBtn = patientList.querySelector("#createPatientBtn");
-      if (createBtn) {
-        createBtn.addEventListener("click", () => {
-          currentPatientId = createPatientId();
-          form.reset();
-          document.querySelector("#clinicalForm input[name='fullName']").value = patientSearch.value.trim();
-          patientList.innerHTML = "";
-          patientCount.textContent = "";
-          setDirty();
-        });
-      }
+      patientList.innerHTML = `<div class="empty-list">No hay pacientes encontrados.</div>`;
       return;
     }
 
@@ -1654,6 +1640,38 @@ addOrthoControlButton.addEventListener("click", () => {
 });
 
 patientSearch.addEventListener("input", renderPatientList);
+
+const fullNameInput = document.querySelector("#clinicalForm input[name='fullName']");
+let createNewBtn = null;
+
+fullNameInput.addEventListener("input", async () => {
+  const name = fullNameInput.value.trim();
+  const existingBtn = document.querySelector("#createNewPatientBtn");
+  if (existingBtn) existingBtn.remove();
+
+  if (name.length < 3) return;
+
+  const patients = await searchPatients(name);
+  if (patients.length) return;
+  if (fullNameInput.value.trim() !== name) return;
+
+  const btn = document.createElement("button");
+  btn.id = "createNewPatientBtn";
+  btn.className = "primary-button";
+  btn.type = "button";
+  btn.textContent = `Crear nuevo paciente`;
+  btn.style.marginTop = "6px";
+  fullNameInput.parentNode.appendChild(btn);
+  createNewBtn = btn;
+
+  btn.addEventListener("click", () => {
+    currentPatientId = createPatientId();
+    btn.remove();
+    createNewBtn = null;
+    setDirty();
+    showToast("Paciente nuevo listo para guardar");
+  });
+});
 
 patientList.addEventListener("click", async (event) => {
   const button = event.target.closest(".patient-card");
