@@ -685,6 +685,21 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function showToast(msg) {
+  let toast = document.querySelector(".toast-msg");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.className = "toast-msg";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.remove("show");
+  void toast.offsetWidth;
+  toast.classList.add("show");
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove("show"), 2500);
+}
+
 function createBudgetRow(item = {}) {
   const row = document.createElement("div");
   row.className = "budget-row";
@@ -1104,8 +1119,9 @@ async function saveRecord() {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    saveStatus.textContent = "Guardado en la nube";
+    saveStatus.textContent = "Guardado";
     saveStatus.classList.add("saved");
+    showToast("Guardado con éxito");
   } catch (err) {
     console.error("Error al guardar:", err);
     saveStatus.textContent = "Error: " + (err.message || "desconocido");
