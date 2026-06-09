@@ -1474,13 +1474,18 @@ loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = loginUser.value.trim().toLowerCase();
   const password = loginPassword.value;
+  const loading = document.querySelector("#loginLoading");
+
+  loading.classList.remove("hidden");
+  loginMessage.textContent = "";
 
   try {
     const user = await startSession(email, password);
-    loginMessage.textContent = "";
     loginRole.value = user.role;
   } catch {
     loginMessage.textContent = "Usuario o contraseña incorrectos";
+  } finally {
+    loading.classList.add("hidden");
   }
 });
 

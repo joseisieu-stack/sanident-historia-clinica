@@ -35,7 +35,28 @@
           </label>
           <button class="primary-button" type="submit">Ingresar</button>
           <p id="loginMessage" class="login-message" aria-live="polite"></p>
-        </form>
+          <div id="loginLoading" class="login-loading hidden">
+            <div class="loading-track">
+              <div class="pikachu-runner">
+                <svg class="pikachu-svg" viewBox="0 0 40 40" width="36" height="36">
+                  <ellipse cx="20" cy="22" rx="14" ry="11" fill="#f6d55c"/>
+                  <polygon points="8,14 4,4 14,11" fill="#f6d55c"/>
+                  <polygon points="32,14 36,4 26,11" fill="#f6d55c"/>
+                  <ellipse cx="15" cy="20" rx="2.5" ry="3" fill="#2d2d2d"/>
+                  <ellipse cx="25" cy="20" rx="2.5" ry="3" fill="#2d2d2d"/>
+                  <ellipse cx="15" cy="21" rx="1.2" ry="1.5" fill="#fff"/>
+                  <ellipse cx="25" cy="21" rx="1.2" ry="1.5" fill="#fff"/>
+                  <ellipse cx="20" cy="26" rx="3" ry="1.8" fill="#2d2d2d"/>
+                  <ellipse cx="20" cy="25" rx="2" ry="1" fill="#e85d5d"/>
+                  <path d="M17 27 Q20 30 23 27" stroke="#2d2d2d" stroke-width="0.8" fill="none"/>
+                  <circle cx="20" cy="27.5" r="1.5" fill="#e85d5d"/>
+                </svg>
+              </div>
+              <div class="loading-track-line">
+                <div class="loading-progress"></div>
+              </div>
+            </div>
+          </div>
       </div>
     </section>
 
