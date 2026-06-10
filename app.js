@@ -1587,15 +1587,6 @@ auxiliaryExamsInput.addEventListener("change", () => {
 });
 
 document.querySelector("#clearButton").addEventListener("click", () => {
-  if (isNewPatient) {
-    const name = fullNameInput.value.trim();
-    currentPatientId = createPatientId();
-    isNewPatient = false;
-    clearButton.classList.remove("can-create");
-    showToast("Paciente nuevo listo para guardar");
-    setDirty();
-    return;
-  }
   currentPatientId = "";
   form.reset();
   patientPhotoInput.value = "";
@@ -1651,21 +1642,6 @@ addOrthoControlButton.addEventListener("click", () => {
 patientSearch.addEventListener("input", renderPatientList);
 
 const fullNameInput = document.querySelector("#clinicalForm input[name='fullName']");
-let isNewPatient = false;
-
-fullNameInput.addEventListener("input", async () => {
-  const name = fullNameInput.value.trim();
-  clearButton.classList.remove("can-create");
-
-  if (name.length < 3) { isNewPatient = false; return; }
-
-  const patients = await searchPatients(name);
-  if (patients.length) { isNewPatient = false; return; }
-  if (fullNameInput.value.trim() !== name) return;
-
-  isNewPatient = true;
-  clearButton.classList.add("can-create");
-});
 
 patientList.addEventListener("click", async (event) => {
   const button = event.target.closest(".patient-card");
