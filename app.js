@@ -1121,6 +1121,7 @@ async function saveRecord() {
     });
     saveStatus.textContent = "Guardado";
     saveStatus.classList.add("saved");
+    clearButton.classList.remove("hidden");
     showToast("Guardado con éxito");
   } catch (err) {
     console.error("Error al guardar:", err);
@@ -1156,6 +1157,7 @@ async function loadRecord(id = "") {
     refreshToothStyles();
     saveStatus.textContent = "Registro recuperado";
     saveStatus.classList.add("saved");
+    clearButton.classList.remove("hidden");
   } catch {
     saveStatus.textContent = "Error al cargar";
   }
@@ -1592,14 +1594,6 @@ auxiliaryExamsInput.addEventListener("change", () => {
 });
 
 document.querySelector("#clearButton").addEventListener("click", () => {
-  if (clearButton.classList.contains("can-create")) {
-    const name = fullNameInput.value.trim();
-    currentPatientId = createPatientId();
-    clearButton.classList.remove("can-create");
-    showToast("Paciente nuevo listo para guardar");
-    setDirty();
-    return;
-  }
   currentPatientId = "";
   form.reset();
   patientPhotoInput.value = "";
@@ -1619,6 +1613,7 @@ document.querySelector("#clearButton").addEventListener("click", () => {
   state.ortho = null;
   orthoInstallationDate.value = "";
   orthoTableBody.innerHTML = "";
+  clearButton.classList.add("hidden");
   setDirty();
 });
 
@@ -1658,8 +1653,7 @@ const fullNameInput = document.querySelector("#clinicalForm input[name='fullName
 const clearButton = document.querySelector("#clearButton");
 
 fullNameInput.addEventListener("input", () => {
-  const name = fullNameInput.value.trim();
-  clearButton.classList.toggle("can-create", name.length > 0);
+  clearButton.classList.remove("hidden");
 });
 
 patientList.addEventListener("click", async (event) => {
