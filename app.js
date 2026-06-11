@@ -1121,7 +1121,6 @@ async function saveRecord() {
     });
     saveStatus.textContent = "Guardado";
     saveStatus.classList.add("saved");
-    clearButton.classList.remove("hidden");
     showToast("Guardado con éxito");
   } catch (err) {
     console.error("Error al guardar:", err);
@@ -1157,7 +1156,6 @@ async function loadRecord(id = "") {
     refreshToothStyles();
     saveStatus.textContent = "Registro recuperado";
     saveStatus.classList.add("saved");
-    clearButton.classList.remove("hidden");
   } catch {
     saveStatus.textContent = "Error al cargar";
   }
@@ -1613,7 +1611,6 @@ document.querySelector("#clearButton").addEventListener("click", () => {
   state.ortho = null;
   orthoInstallationDate.value = "";
   orthoTableBody.innerHTML = "";
-  clearButton.classList.add("hidden");
   setDirty();
 });
 
@@ -1649,12 +1646,7 @@ addOrthoControlButton.addEventListener("click", () => {
 
 patientSearch.addEventListener("input", renderPatientList);
 
-const fullNameInput = document.querySelector("#clinicalForm input[name='fullName']");
 const clearButton = document.querySelector("#clearButton");
-
-fullNameInput.addEventListener("input", () => {
-  clearButton.classList.remove("hidden");
-});
 
 patientList.addEventListener("click", async (event) => {
   const button = event.target.closest(".patient-card");
