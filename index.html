@@ -172,7 +172,10 @@
           <div class="detail-card receipt-card" aria-label="Nota de pedido">
             <div class="detail-card-header">
               <h3>Nota de pedido</h3>
-              <button class="ghost-button compact" id="addBudgetItemButton" type="button">Agregar fila</button>
+              <div style="display:flex;gap:6px">
+                <button class="ghost-button compact" id="printOrderButton" type="button">Imprimir recibo</button>
+                <button class="ghost-button compact" id="addBudgetItemButton" type="button">Agregar fila</button>
+              </div>
             </div>
             <table class="budget-table">
               <thead>
@@ -190,7 +193,6 @@
               <span class="total-label">TOTAL S/</span>
               <span id="budgetTotal" class="total-amount">0.00</span>
             </div>
-            <button class="primary-button" id="printOrderButton" type="button" style="margin-top:10px;width:100%">Imprimir recibo</button>
           </div>
 
           <div class="detail-card" aria-label="Proximas citas del paciente">
