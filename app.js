@@ -171,6 +171,8 @@ const diagnosisTags = document.querySelector("#diagnosisTags");
 const addDiagnosisButton = document.querySelector("#addDiagnosisButton");
 const budgetItems = document.querySelector("#budgetItems");
 const budgetTotal = document.querySelector("#budgetTotal");
+const budgetAdvance = document.querySelector("#budgetAdvance");
+const budgetBalance = document.querySelector("#budgetBalance");
 const appointmentItems = document.querySelector("#appointmentItems");
 const addBudgetItemButton = document.querySelector("#addBudgetItemButton");
 const addAppointmentButton = document.querySelector("#addAppointmentButton");
@@ -740,6 +742,14 @@ function calculateBudget() {
     total += importe;
   });
   budgetTotal.textContent = total.toFixed(2);
+  updateBalance();
+}
+
+function updateBalance() {
+  const total = Number(budgetTotal.textContent) || 0;
+  const advance = Number(budgetAdvance.value) || 0;
+  const balance = total - advance;
+  budgetBalance.textContent = balance.toFixed(2);
 }
 
 function getBudgetData() {
@@ -751,6 +761,7 @@ function getBudgetData() {
         price: row.querySelector(".budget-price").value,
       }))
       .filter((item) => item.treatment || item.price),
+    advance: budgetAdvance.value,
   };
 }
 
@@ -758,6 +769,7 @@ function fillBudgetData(data = {}) {
   budgetItems.innerHTML = "";
   const items = data.items?.length ? data.items : [{}];
   items.forEach((item) => budgetItems.appendChild(createBudgetRow(item)));
+  budgetAdvance.value = data.advance || "";
   calculateBudget();
 }
 
@@ -1148,6 +1160,8 @@ document.querySelector("#printOrderButton").addEventListener("click", async () =
     importe: ((Number(row.querySelector(".budget-qty").value) || 0) * (Number(row.querySelector(".budget-price").value) || 0)).toFixed(2),
   }));
   const total = items.reduce((s, i) => s + Number(i.importe), 0).toFixed(2);
+  const advance = Number(budgetAdvance.value) || 0;
+  const balance = (Number(total) - advance).toFixed(2);
   const win = window.open("", "_blank");
   const logoUrl = `${location.origin}${location.pathname.replace(/\/+$/, "")}/images/logo-del-consul.jpeg`;
   win.document.write(`
@@ -1220,6 +1234,15 @@ document.querySelector("#printOrderButton").addEventListener("click", async () =
           <td colspan="3" class="total-label">TOTAL S/</td>
           <td class="total-val">${total}</td>
         </tr>
+        ${advance > 0 ? `
+        <tr class="total-row">
+          <td colspan="3" class="total-label" style="color:#888;font-weight:400;">Adelanto S/</td>
+          <td class="total-val" style="color:#888;font-weight:400;">-${advance.toFixed(2)}</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="3" class="total-label" style="border-top:1px solid #000;">RESTA S/</td>
+          <td class="total-val" style="border-top:1px solid #000;">${balance}</td>
+        </tr>` : ""}
       </table>
       <hr>
       <script>window.print();window.close();<` + `/script>
@@ -1544,6 +1567,10 @@ budgetItems.addEventListener("click", (event) => {
 });
 addBudgetItemButton.addEventListener("click", () => {
   budgetItems.appendChild(createBudgetRow());
+  setDirty();
+});
+budgetAdvance.addEventListener("input", () => {
+  updateBalance();
   setDirty();
 });
 appointmentItems.addEventListener("input", setDirty);

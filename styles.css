@@ -627,6 +627,37 @@ label:nth-child(n + 5) {
   font-size: 1.3rem;
 }
 
+.budget-extra {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 12px 0;
+  font-size: 0.95rem;
+}
+
+.budget-extra label {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.budget-extra input {
+  width: 100px;
+  padding: 4px 6px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+.balance-amount {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #c0392b;
+}
+
 .icon-danger-button {
   width: 38px;
   min-height: 38px;
