@@ -171,8 +171,6 @@ const diagnosisTags = document.querySelector("#diagnosisTags");
 const addDiagnosisButton = document.querySelector("#addDiagnosisButton");
 const budgetItems = document.querySelector("#budgetItems");
 const budgetTotal = document.querySelector("#budgetTotal");
-const budgetAdvance = document.querySelector("#budgetAdvance");
-const budgetBalance = document.querySelector("#budgetBalance");
 const appointmentItems = document.querySelector("#appointmentItems");
 const addBudgetItemButton = document.querySelector("#addBudgetItemButton");
 const addAppointmentButton = document.querySelector("#addAppointmentButton");
@@ -473,6 +471,7 @@ function applySession(session) {
   const readonly = session?.role === "Invitado";
   document.querySelector("#saveButton").classList.toggle("hidden", readonly);
   document.querySelector("#printButton").classList.toggle("hidden", readonly);
+  document.querySelector("#printOrderButton").classList.toggle("hidden", readonly);
   document.querySelector("#addBudgetItemButton").classList.toggle("hidden", readonly);
   document.querySelector("#addAppointmentButton").classList.toggle("hidden", readonly);
   document.querySelector("#clearButton").classList.toggle("hidden", readonly);
@@ -701,18 +700,15 @@ function showToast(msg) {
 }
 
 function createBudgetRow(item = {}) {
-  const row = document.createElement("div");
+  const row = document.createElement("tr");
   row.className = "budget-row";
+  const importe = (Number(item.qty) || 0) * (Number(item.price) || 0);
   row.innerHTML = `
-    <label>
-      Tratamiento
-      <input class="budget-treatment" placeholder="Tratamiento realizado o indicado" value="${item.treatment || ""}">
-    </label>
-    <label>
-      Precio
-      <input class="budget-price" type="number" min="0" step="0.01" placeholder="0.00" value="${item.price || ""}">
-    </label>
-    <button class="icon-danger-button" type="button" title="Eliminar tratamiento">X</button>
+    <td><input class="budget-qty" type="number" min="1" step="1" value="${item.qty || 1}"></td>
+    <td><input class="budget-treatment" placeholder="Descripci&oacute;n" value="${item.treatment || ""}"></td>
+    <td><input class="budget-price" type="number" min="0" step="0.01" placeholder="0.00" value="${item.price || ""}"></td>
+    <td class="importe-cell">${importe.toFixed(2)}</td>
+    <td><button class="icon-danger-button" type="button" title="Eliminar">X</button></td>
   `;
   return row;
 }
@@ -735,22 +731,26 @@ function createAppointmentRow(item = {}) {
 }
 
 function calculateBudget() {
-  const total = Array.from(budgetItems.querySelectorAll(".budget-price"))
-    .reduce((sum, input) => sum + (Number(input.value) || 0), 0);
-  const advance = Number(budgetAdvance.value) || 0;
-  budgetTotal.value = total.toFixed(2);
-  budgetBalance.value = Math.max(total - advance, 0).toFixed(2);
+  let total = 0;
+  budgetItems.querySelectorAll(".budget-row").forEach((row) => {
+    const qty = Number(row.querySelector(".budget-qty").value) || 0;
+    const price = Number(row.querySelector(".budget-price").value) || 0;
+    const importe = qty * price;
+    row.querySelector(".importe-cell").textContent = importe.toFixed(2);
+    total += importe;
+  });
+  budgetTotal.textContent = total.toFixed(2);
 }
 
 function getBudgetData() {
   return {
     items: Array.from(budgetItems.querySelectorAll(".budget-row"))
       .map((row) => ({
+        qty: row.querySelector(".budget-qty").value,
         treatment: row.querySelector(".budget-treatment").value.trim(),
         price: row.querySelector(".budget-price").value,
       }))
       .filter((item) => item.treatment || item.price),
-    advance: budgetAdvance.value,
   };
 }
 
@@ -758,7 +758,6 @@ function fillBudgetData(data = {}) {
   budgetItems.innerHTML = "";
   const items = data.items?.length ? data.items : [{}];
   items.forEach((item) => budgetItems.appendChild(createBudgetRow(item)));
-  budgetAdvance.value = data.advance || "";
   calculateBudget();
 }
 
@@ -1137,6 +1136,71 @@ async function printRecord() {
   window.print();
 }
 
+document.querySelector("#printOrderButton").addEventListener("click", async () => {
+  const session = currentSession();
+  if (session?.role === "Invitado") return;
+  const name = document.querySelector("#clinicalForm input[name='fullName']").value || "Paciente";
+  const rows = Array.from(budgetItems.querySelectorAll(".budget-row"));
+  const items = rows.map((row) => ({
+    qty: row.querySelector(".budget-qty").value || "1",
+    treatment: row.querySelector(".budget-treatment").value || "",
+    price: row.querySelector(".budget-price").value || "0",
+    importe: ((Number(row.querySelector(".budget-qty").value) || 0) * (Number(row.querySelector(".budget-price").value) || 0)).toFixed(2),
+  }));
+  const total = items.reduce((s, i) => s + Number(i.importe), 0).toFixed(2);
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head><meta charset="utf-8"><title>Nota de pedido</title>
+    <style>
+      body { font-family: 'Courier New', monospace; font-size: 13px; margin: 30px; color: #000; }
+      h1 { text-align: center; font-size: 18px; margin-bottom: 4px; text-transform: uppercase; }
+      .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+      .sub { font-size: 12px; color: #555; }
+      table { width: 100%; border-collapse: collapse; }
+      th { border-bottom: 1px solid #000; padding: 6px 4px; text-align: left; font-size: 12px; }
+      td { padding: 5px 4px; border-bottom: 1px dotted #ccc; }
+      .col-qty { width: 50px; text-align: center; }
+      .col-pu, .col-importe { width: 80px; text-align: right; }
+      .total-row td { border: none; font-weight: bold; padding-top: 10px; font-size: 14px; }
+      .total-label { text-align: right; }
+      .total-val { text-align: right; }
+      .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #888; border-top: 1px dashed #000; padding-top: 10px; }
+    </style>
+    </head><body>
+      <div class="header">
+        <h1>Nota de pedido</h1>
+        <div class="sub">${name}</div>
+        <div class="sub">${new Date().toLocaleDateString("es-PE")}</div>
+      </div>
+      <table>
+        <tr>
+          <th class="col-qty">Cant.</th>
+          <th>Descripci&oacute;n</th>
+          <th class="col-pu">P.U.</th>
+          <th class="col-importe">Importe</th>
+        </tr>
+        ${items.map((i) => `
+          <tr>
+            <td class="col-qty">${i.qty}</td>
+            <td>${i.treatment}</td>
+            <td class="col-pu">${i.price}</td>
+            <td class="col-importe">${i.importe}</td>
+          </tr>
+        `).join("")}
+        <tr class="total-row">
+          <td colspan="3" class="total-label">TOTAL S/</td>
+          <td class="total-val">${total}</td>
+        </tr>
+      </table>
+      <div class="footer">Sani Dent - Historia Cl&iacute;nica</div>
+      <script>window.print();window.close();<` + `/script>
+    </body></html>
+  `);
+  win.document.close();
+});
+
 async function loadRecord(id = "") {
   try {
     const payload = id ? await api(`/records/${id}`) : null;
@@ -1441,10 +1505,6 @@ diagnosisTags.addEventListener("click", (event) => {
 chartDiagnosis.addEventListener("input", setDirty);
 chartObservations.addEventListener("input", setDirty);
 budgetItems.addEventListener("input", () => {
-  calculateBudget();
-  setDirty();
-});
-budgetAdvance.addEventListener("input", () => {
   calculateBudget();
   setDirty();
 });

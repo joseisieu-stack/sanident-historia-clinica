@@ -548,31 +548,83 @@ label:nth-child(n + 5) {
   font-size: 0.98rem;
 }
 
-.budget-items,
 .appointment-items {
   display: grid;
   gap: 8px;
 }
 
-.budget-row,
 .appointment-row {
   display: grid;
   gap: 8px;
   align-items: end;
 }
 
-.budget-row {
-  grid-template-columns: minmax(0, 1fr) 130px auto;
-}
-
 .appointment-row {
   grid-template-columns: minmax(0, 1fr) 190px auto;
 }
 
-.budget-summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.budget-table th {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.budget-table td {
+  padding: 3px 4px;
+  vertical-align: middle;
+}
+
+.budget-table input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.budget-table .col-qty { width: 50px; }
+.budget-table .col-qty input { text-align: center; }
+.budget-table .col-pu { width: 90px; }
+.budget-table .col-pu input { text-align: right; }
+.budget-table .col-importe { width: 90px; text-align: right; }
+.budget-table .col-del { width: 38px; }
+
+.importe-cell {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.budget-total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   gap: 10px;
+  padding: 10px 12px 0;
+  border-top: 2px solid var(--text);
+  margin-top: 6px;
+}
+
+.total-label {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.total-amount {
+  font-weight: 800;
+  font-size: 1.3rem;
 }
 
 .icon-danger-button {
@@ -1265,7 +1317,8 @@ button:focus-visible {
   .db-plan,
   .legend,
   .selection-box,
-  #saveStatus {
+  #saveStatus,
+  .receipt-card {
     display: none !important;
   }
 

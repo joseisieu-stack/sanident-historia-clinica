@@ -62,6 +62,7 @@
         <button class="primary-button hidden" id="manageUsersButton" type="button">Crear usuario</button>
         <button class="ghost-button" id="clearButton" type="button">Historia nueva</button>
         <button class="ghost-button" id="printButton" type="button">Imprimir PDF</button>
+        <button class="ghost-button" id="printOrderButton" type="button">Imprimir recibo</button>
         <button class="primary-button" id="saveButton" type="button">Guardar</button>
         <button class="ghost-button" id="logoutButton" type="button">Salir</button>
       </div>
@@ -169,25 +170,26 @@
         </form>
 
         <section class="clinic-detail-grid">
-          <div class="detail-card" aria-label="Presupuesto del paciente">
+          <div class="detail-card receipt-card" aria-label="Nota de pedido">
             <div class="detail-card-header">
-              <h3>Presupuesto</h3>
-              <button class="ghost-button compact" id="addBudgetItemButton" type="button">Agregar tratamiento</button>
+              <h3>Nota de pedido</h3>
+              <button class="ghost-button compact" id="addBudgetItemButton" type="button">Agregar fila</button>
             </div>
-            <div id="budgetItems" class="budget-items"></div>
-            <div class="budget-summary">
-              <label>
-                Total
-                <input id="budgetTotal" type="number" min="0" step="0.01" readonly>
-              </label>
-              <label>
-                Adelanto
-                <input id="budgetAdvance" type="number" min="0" step="0.01" placeholder="0.00">
-              </label>
-              <label>
-                Resta por pagar
-                <input id="budgetBalance" type="number" min="0" step="0.01" readonly>
-              </label>
+            <table class="budget-table">
+              <thead>
+                <tr>
+                  <th class="col-qty">Cant.</th>
+                  <th class="col-desc">Descripci&oacute;n</th>
+                  <th class="col-pu">P.U.</th>
+                  <th class="col-importe">Importe</th>
+                  <th class="col-del"></th>
+                </tr>
+              </thead>
+              <tbody id="budgetItems"></tbody>
+            </table>
+            <div class="budget-total-row">
+              <span class="total-label">TOTAL S/</span>
+              <span id="budgetTotal" class="total-amount">0.00</span>
             </div>
           </div>
 
