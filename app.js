@@ -1149,44 +1149,71 @@ document.querySelector("#printOrderButton").addEventListener("click", async () =
   }));
   const total = items.reduce((s, i) => s + Number(i.importe), 0).toFixed(2);
   const win = window.open("", "_blank");
+  const logoUrl = `${location.origin}${location.pathname.replace(/\/+$/, "")}/images/logo-del-consul.jpeg`;
   win.document.write(`
     <!DOCTYPE html>
     <html lang="es">
     <head><meta charset="utf-8"><title>Nota de pedido</title>
     <style>
-      body { font-family: 'Courier New', monospace; font-size: 13px; margin: 30px; color: #000; }
-      h1 { text-align: center; font-size: 18px; margin-bottom: 4px; text-transform: uppercase; }
-      .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-      .sub { font-size: 12px; color: #555; }
+      @page { margin: 10mm; }
+      body { font-family: 'Courier New', monospace; font-size: 13px; margin: 0; padding: 0; color: #000; }
+      .top-section { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+      .left { display: flex; gap: 12px; align-items: center; }
+      .left img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+      .clinic-name { font-weight: 800; font-size: 16px; text-transform: uppercase; }
+      .clinic-info { font-size: 11px; color: #555; line-height: 1.4; }
+      .right { text-align: right; }
+      .right .ruc { font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+      .right .nota-title { font-weight: 800; font-size: 16px; text-transform: uppercase; }
+      .right .nota-num { font-size: 14px; font-weight: 700; margin-top: 2px; }
+      .patient-name { font-weight: 700; font-size: 14px; margin: 10px 0 4px; }
+      .date { font-size: 11px; color: #888; margin-bottom: 16px; }
       table { width: 100%; border-collapse: collapse; }
-      th { border-bottom: 1px solid #000; padding: 6px 4px; text-align: left; font-size: 12px; }
-      td { padding: 5px 4px; border-bottom: 1px dotted #ccc; }
-      .col-qty { width: 50px; text-align: center; }
-      .col-pu, .col-importe { width: 80px; text-align: right; }
+      th { border-bottom: 2px solid #000; padding: 6px 4px; text-align: left; font-size: 12px; text-transform: uppercase; }
+      th:nth-child(1) { width: 50px; text-align: center; }
+      th:nth-child(3) { width: 80px; text-align: right; }
+      th:nth-child(4) { width: 80px; text-align: right; }
+      td { padding: 5px 4px; border-bottom: 1px dotted #ccc; font-size: 12px; }
+      td:nth-child(1) { text-align: center; }
+      td:nth-child(3) { text-align: right; }
+      td:nth-child(4) { text-align: right; font-weight: 600; }
       .total-row td { border: none; font-weight: bold; padding-top: 10px; font-size: 14px; }
       .total-label { text-align: right; }
-      .total-val { text-align: right; }
-      .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #888; border-top: 1px dashed #000; padding-top: 10px; }
+      .total-val { text-align: right; font-size: 16px; }
+      hr { border: none; border-top: 1px dashed #aaa; margin: 20px 0; }
     </style>
     </head><body>
-      <div class="header">
-        <h1>Nota de pedido</h1>
-        <div class="sub">${name}</div>
-        <div class="sub">${new Date().toLocaleDateString("es-PE")}</div>
+      <div class="top-section">
+        <div class="left">
+          <img src="${logoUrl}" alt="Logo">
+          <div>
+            <div class="clinic-name">SANI DENT</div>
+            <div class="clinic-info">Odontolog&iacute;a con tecnolog&iacute;a</div>
+            <div class="clinic-info">JR. SAN CRISTOBAL NRO. 301</div>
+            <div class="clinic-info">PASCO - PASCO - CHAUPIMARCA</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="ruc">RUC: 10449297917</div>
+          <div class="nota-title">Nota de pedido</div>
+          <div class="nota-num">N&deg; 001</div>
+        </div>
       </div>
+      <div class="patient-name">${name}</div>
+      <div class="date">${new Date().toLocaleDateString("es-PE")}</div>
       <table>
         <tr>
-          <th class="col-qty">Cant.</th>
+          <th>Cant.</th>
           <th>Descripci&oacute;n</th>
-          <th class="col-pu">P.U.</th>
-          <th class="col-importe">Importe</th>
+          <th>P.U.</th>
+          <th>Importe</th>
         </tr>
         ${items.map((i) => `
           <tr>
-            <td class="col-qty">${i.qty}</td>
+            <td>${i.qty}</td>
             <td>${i.treatment}</td>
-            <td class="col-pu">${i.price}</td>
-            <td class="col-importe">${i.importe}</td>
+            <td>${i.price}</td>
+            <td>${i.importe}</td>
           </tr>
         `).join("")}
         <tr class="total-row">
@@ -1194,7 +1221,7 @@ document.querySelector("#printOrderButton").addEventListener("click", async () =
           <td class="total-val">${total}</td>
         </tr>
       </table>
-      <div class="footer">Sani Dent - Historia Cl&iacute;nica</div>
+      <hr>
       <script>window.print();window.close();<` + `/script>
     </body></html>
   `);
