@@ -361,14 +361,6 @@ function renderFindingButtons() {
     fragment.appendChild(button);
   });
 
-  const clearButton = document.createElement("button");
-  clearButton.type = "button";
-  clearButton.className = "finding-chip clear-chip";
-  clearButton.dataset.finding = "";
-  clearButton.title = "Borrar hallazgo de la pieza";
-  clearButton.innerHTML = `<span class="finding-code">Borrar</span><span>Borrar hallazgo</span>`;
-  fragment.appendChild(clearButton);
-
   Object.entries(findings)
     .filter(([key, finding]) => !finding.hidden && key !== "root-remnant")
     .sort((a, b) => a[1].label.localeCompare(b[1].label, "es", { sensitivity: "base" }))
