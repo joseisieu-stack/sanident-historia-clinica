@@ -1214,7 +1214,7 @@ document.querySelector("#printOrderButton").addEventListener("click", async () =
   win.document.write(`
     <!DOCTYPE html>
     <html lang="es">
-    <head><meta charset="utf-8"><title>Nota de pedido</title>
+    <head><meta charset="utf-8"><title>Recibo de Atencion</title>
     <style>
       @page { margin: 10mm; }
       body { font-family: 'Courier New', monospace; font-size: 13px; margin: 0; padding: 0; color: #000; }
@@ -1256,7 +1256,7 @@ document.querySelector("#printOrderButton").addEventListener("click", async () =
         </div>
         <div class="right">
           <div class="ruc">RUC: 10449297917</div>
-          <div class="nota-title">Nota de pedido</div>
+          <div class="nota-title">Recibo de Atencion</div>
           <div class="nota-num">N&deg; 001</div>
         </div>
       </div>
