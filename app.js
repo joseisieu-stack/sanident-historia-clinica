@@ -214,6 +214,7 @@ const fractureOptions = document.querySelector("#fractureOptions");
 const supernumeraryOptions = document.querySelector("#supernumeraryOptions");
 const positionOptions = document.querySelector("#positionOptions");
 const eraseSurfaceButton = document.querySelector("#eraseSurfaceButton");
+const clearFindingButton = document.querySelector("#clearFindingButton");
 
 let patientPhotoData = "";
 let auxiliaryExamNames = [];
@@ -485,7 +486,7 @@ function applySession(session) {
   form.querySelectorAll("input, textarea, select").forEach((el) => {
     el.readOnly = readonly;
   });
-  document.querySelectorAll(".icon-danger-button, #eraseSurfaceButton, #resetChartButton, #addDiagnosisButton").forEach((el) => {
+  document.querySelectorAll(".icon-danger-button, #eraseSurfaceButton, #clearFindingButton, #resetChartButton, #addDiagnosisButton").forEach((el) => {
     el.classList.toggle("hidden", readonly);
   });
   if (session) renderPatientList();
@@ -1353,6 +1354,7 @@ function setActiveTool(tool) {
     item.classList.toggle("active", isTool || isFinding);
   });
   eraseSurfaceButton.classList.toggle("active", tool === "healthy");
+  clearFindingButton.classList.toggle("active", tool === "piece-finding" && !state.activeFinding);
   if (tool !== "piece-finding") {
     state.activeFinding = "";
     state.pendingSpanStart = "";
@@ -1528,6 +1530,13 @@ findingQuickButtons.addEventListener("click", (event) => {
 eraseSurfaceButton.addEventListener("click", () => {
   setActiveTool("healthy");
   selectedTooth.textContent = "Herramienta seleccionada: borrar superficie";
+});
+
+clearFindingButton.addEventListener("click", () => {
+  state.activeFinding = "";
+  state.pendingSpanStart = "";
+  setActiveTool("piece-finding");
+  selectedTooth.textContent = "Herramienta seleccionada: borrar hallazgo";
 });
 
 odontogram.addEventListener("click", (event) => {
