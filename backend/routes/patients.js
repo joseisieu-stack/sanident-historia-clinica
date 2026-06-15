@@ -70,4 +70,47 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+router.post("/deduplicate", auth, async (req, res) => {
+  try {
+    // Find duplicate names (case-insensitive)
+    const dupes = await query(`
+      SELECT LOWER(TRIM(full_name)) as clean_name, array_agg(id ORDER BY updated_at DESC) as ids
+      FROM patients
+      GROUP BY clean_name
+      HAVING COUNT(*) > 1
+    `);
+    let removed = 0;
+    for (const row of dupes.rows) {
+      const ids = row.ids;
+      const keepId = ids[0];
+      const deleteIds = ids.slice(1);
+      // Reassign clinical_records to kept patient
+      for (const delId of deleteIds) {
+        await query(`UPDATE clinical_records SET patient_id = $1 WHERE patient_id = $2`, [keepId, delId]);
+        await query(`DELETE FROM patient_files WHERE patient_id = $1`, [delId]);
+        await query(`DELETE FROM patients WHERE id = $1`, [delId]);
+        removed++;
+      }
+    }
+    // Return updated list
+    const result = await query(`
+      SELECT id, full_name, document_id, phone, created_at
+      FROM patients ORDER BY full_name ASC
+    `);
+    res.json({
+      removed,
+      patients: result.rows.map((p) => ({
+        id: String(p.id),
+        fullName: p.full_name,
+        documentId: p.document_id || "",
+        phone: p.phone || "",
+        savedAt: p.created_at,
+      })),
+    });
+  } catch (err) {
+    console.error("Error deduplicating:", err);
+    res.status(500).json({ error: "Error del servidor" });
+  }
+});
+
 module.exports = router;

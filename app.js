@@ -180,6 +180,9 @@ const patientSearch = document.querySelector("#patientSearch");
 const patientList = document.querySelector("#patientList");
 const patientCount = document.querySelector("#patientCount");
 const listAllButton = document.querySelector("#listAllButton");
+const patientModal = document.querySelector("#patientModal");
+const patientModalList = document.querySelector("#patientModalList");
+const closePatientModal = document.querySelector("#closePatientModal");
 const patientPhotoInput = document.querySelector("#patientPhotoInput");
 const patientPhotoPreview = document.querySelector("#patientPhotoPreview");
 const auxiliaryExamsInput = document.querySelector("#auxiliaryExamsInput");
@@ -1107,31 +1110,44 @@ function renderPatientList() {
 
 async function listAllPatients() {
   try {
-    const patients = await api(`/patients?sort=alpha`);
-    patientList.innerHTML = "";
-    patientCount.textContent = `${patients.length} pacientes`;
+    const result = await api(`/patients/deduplicate`, { method: "POST" });
+    const patients = result.patients;
+    const removed = result.removed;
 
+    patientModalList.innerHTML = "";
     if (!patients.length) {
-      patientList.innerHTML = `<div class="empty-list">No hay pacientes registrados.</div>`;
-      return;
-    }
+      patientModalList.innerHTML = `<div class="empty-list">No hay pacientes registrados.</div>`;
+    } else {
+      let msg = `${patients.length} pacientes`;
+      if (removed > 0) msg += ` (${removed} duplicados eliminados)`;
+      const info = document.createElement("div");
+      info.className = "patient-count";
+      info.textContent = msg;
+      patientModalList.appendChild(info);
 
-    const fragment = document.createDocumentFragment();
-    patients.forEach((patient) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `patient-card${patient.id === currentPatientId ? " active" : ""}`;
-      button.dataset.patientId = patient.id;
-      const date = patient.savedAt ? new Date(patient.savedAt).toLocaleDateString("es-PE") : "";
-      button.innerHTML = `
-        <strong>${patient.fullName}</strong>
-        <span>DNI/ID: ${patient.documentId || "sin documento"} | Tel: ${patient.phone || "sin telefono"} | ${date}</span>
-      `;
-      fragment.appendChild(button);
-    });
-    patientList.appendChild(fragment);
+      patients.forEach((patient) => {
+        const div = document.createElement("div");
+        div.className = `patient-card${patient.id === currentPatientId ? " active" : ""}`;
+        div.dataset.patientId = patient.id;
+        div.style.cursor = "pointer";
+        const date = patient.savedAt ? new Date(patient.savedAt).toLocaleDateString("es-PE") : "";
+        div.innerHTML = `
+          <strong>${patient.fullName}</strong>
+          <span>DNI/ID: ${patient.documentId || "sin documento"} | Tel: ${patient.phone || "sin telefono"} | ${date}</span>
+        `;
+        div.addEventListener("click", async () => {
+          patientModal.classList.add("hidden");
+          patientSearch.value = patient.fullName;
+          await loadRecord(patient.id);
+          renderPatientList();
+        });
+        patientModalList.appendChild(div);
+      });
+    }
+    patientModal.classList.remove("hidden");
   } catch {
-    patientList.innerHTML = `<div class="empty-list">Error al cargar pacientes.</div>`;
+    patientModalList.innerHTML = `<div class="empty-list">Error al cargar pacientes.</div>`;
+    patientModal.classList.remove("hidden");
   }
 }
 
@@ -1795,6 +1811,9 @@ listAllButton.addEventListener("click", () => {
   patientSearch.value = "";
   listAllPatients();
 });
+
+closePatientModal.addEventListener("click", () => patientModal.classList.add("hidden"));
+patientModal.addEventListener("click", (e) => { if (e.target === patientModal) patientModal.classList.add("hidden"); });
 
 const clearButton = document.querySelector("#clearButton");
 
