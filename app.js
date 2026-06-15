@@ -179,6 +179,7 @@ const addAppointmentButton = document.querySelector("#addAppointmentButton");
 const patientSearch = document.querySelector("#patientSearch");
 const patientList = document.querySelector("#patientList");
 const patientCount = document.querySelector("#patientCount");
+const listAllButton = document.querySelector("#listAllButton");
 const patientPhotoInput = document.querySelector("#patientPhotoInput");
 const patientPhotoPreview = document.querySelector("#patientPhotoPreview");
 const auxiliaryExamsInput = document.querySelector("#auxiliaryExamsInput");
@@ -1104,6 +1105,36 @@ function renderPatientList() {
   });
 }
 
+async function listAllPatients() {
+  try {
+    const patients = await api(`/patients?sort=alpha`);
+    patientList.innerHTML = "";
+    patientCount.textContent = `${patients.length} pacientes`;
+
+    if (!patients.length) {
+      patientList.innerHTML = `<div class="empty-list">No hay pacientes registrados.</div>`;
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    patients.forEach((patient) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `patient-card${patient.id === currentPatientId ? " active" : ""}`;
+      button.dataset.patientId = patient.id;
+      const date = patient.savedAt ? new Date(patient.savedAt).toLocaleDateString("es-PE") : "";
+      button.innerHTML = `
+        <strong>${patient.fullName}</strong>
+        <span>DNI/ID: ${patient.documentId || "sin documento"} | Tel: ${patient.phone || "sin telefono"} | ${date}</span>
+      `;
+      fragment.appendChild(button);
+    });
+    patientList.appendChild(fragment);
+  } catch {
+    patientList.innerHTML = `<div class="empty-list">Error al cargar pacientes.</div>`;
+  }
+}
+
 async function saveRecord() {
   const session = currentSession();
   if (session?.role === "Invitado") {
@@ -1759,6 +1790,11 @@ addOrthoControlButton.addEventListener("click", () => {
 });
 
 patientSearch.addEventListener("input", renderPatientList);
+
+listAllButton.addEventListener("click", () => {
+  patientSearch.value = "";
+  listAllPatients();
+});
 
 const clearButton = document.querySelector("#clearButton");
 

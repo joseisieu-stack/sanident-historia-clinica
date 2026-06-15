@@ -19,6 +19,7 @@ function auth(req, res, next) {
 router.get("/", auth, async (req, res) => {
   try {
     const search = (req.query.search || "").trim().toLowerCase();
+    const sort = req.query.sort || "";
     let rows;
     if (search) {
       const result = await query(`
@@ -27,6 +28,12 @@ router.get("/", auth, async (req, res) => {
         WHERE LOWER(full_name) LIKE $1 OR document_id LIKE $1 OR phone LIKE $1
         ORDER BY updated_at DESC
       `, [`%${search}%`]);
+      rows = result.rows;
+    } else if (sort === "alpha") {
+      const result = await query(`
+        SELECT id, full_name, document_id, phone, created_at
+        FROM patients ORDER BY full_name ASC
+      `);
       rows = result.rows;
     } else {
       const result = await query(`
