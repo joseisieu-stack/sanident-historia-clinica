@@ -189,6 +189,8 @@ const auxiliaryExamsInput = document.querySelector("#auxiliaryExamsInput");
 const examList = document.querySelector("#examList");
 const orthoInstallationDate = document.querySelector("#orthoInstallationDate");
 orthoInstallationDate.value = new Date().toISOString().split("T")[0];
+const orthoBracketType = document.querySelector("#orthoBracketType");
+const orthoMonthlyPrice = document.querySelector("#orthoMonthlyPrice");
 const orthoTableBody = document.querySelector("#orthoTableBody");
 const addOrthoControlButton = document.querySelector("#addOrthoControlButton");
 const restorationDetail = document.querySelector("#restorationDetail");
@@ -563,6 +565,8 @@ function fillChartNotes(notes = {}) {
 
 function getOrthoData() {
   const installationDate = orthoInstallationDate.value;
+  const bracketType = orthoBracketType.value;
+  const monthlyPrice = orthoMonthlyPrice.value;
   const controls = [];
   const rows = orthoTableBody.querySelectorAll("tr");
   rows.forEach((row) => {
@@ -574,17 +578,21 @@ function getOrthoData() {
     const approval = row.querySelector(".approve-check")?.checked || false;
     controls.push({ id: Number(id), expectedDate: expected, attended, attendedDate, procedures, approval });
   });
-  return installationDate || controls.length ? { installationDate, controls } : null;
+  return installationDate || controls.length ? { installationDate, bracketType, monthlyPrice, controls } : null;
 }
 
 function renderOrthodontics(data) {
   if (!data || (!data.installationDate && !data.controls?.length)) {
-    orthoInstallationDate.value = "";
+    orthoInstallationDate.value = new Date().toISOString().split("T")[0];
+    orthoBracketType.value = "normal";
+    orthoMonthlyPrice.value = "";
     orthoTableBody.innerHTML = "";
     state.ortho = null;
     return;
   }
   orthoInstallationDate.value = data.installationDate || "";
+  orthoBracketType.value = data.bracketType || "normal";
+  orthoMonthlyPrice.value = data.monthlyPrice || "";
   state.ortho = data;
   renderOrthoControls(data.controls || []);
 }
@@ -1196,6 +1204,8 @@ document.querySelector("#printOrthoButton").addEventListener("click", async () =
   if (session?.role === "Invitado") return;
   const name = document.querySelector("#clinicalForm input[name='fullName']").value || "Paciente";
   const installDate = orthoInstallationDate.value || "—";
+  const bracketType = orthoBracketType.options[orthoBracketType.selectedIndex].text;
+  const monthlyPrice = orthoMonthlyPrice.value || "—";
   const rows = Array.from(orthoTableBody.querySelectorAll("tr"));
   const items = rows.map((r) => ({
     num: r.dataset.id,
@@ -1238,10 +1248,11 @@ document.querySelector("#printOrthoButton").addEventListener("click", async () =
         </div>
       </div>
       <h2>Control de Ortodoncia</h2>
-      <div class="info"><strong>Paciente:</strong> ${name} &nbsp;|&nbsp; <strong>Instalaci&oacute;n:</strong> ${installDate}</div>
+      <div class="info"><strong>Paciente:</strong> ${name} &nbsp;|&nbsp; <strong>Instalaci&oacute;n:</strong> ${installDate} &nbsp;|&nbsp; <strong>Brackets:</strong> ${bracketType} ${monthlyPrice !== "—" ? `&nbsp;|&nbsp; <strong>Precio control:</strong> S/ ${monthlyPrice}` : ""}</div>
       <table>
         <tr><th>N°</th><th>Fecha</th><th>¿Cumpli&oacute;?</th><th>Procedimientos</th><th>V°B°</th></tr>
         ${items.map((i) => `<tr><td>${i.num}</td><td>${i.date}</td><td>${i.attended}</td><td>${escapeHtml(i.procedures)}</td><td>${i.approval}</td></tr>`).join("")}
+        ${monthlyPrice !== "—" ? `<tr style="border-top:2px solid #000;font-weight:700"><td colspan="4" style="text-align:right">Precio control mensual S/</td><td style="text-align:center">${monthlyPrice}</td></tr>` : ""}
       </table>
       <script>window.print();window.close();<` + `/script>
     </body></html>
@@ -1832,7 +1843,9 @@ document.querySelector("#clearButton").addEventListener("click", () => {
   renderPatientList();
   refreshToothStyles();
   state.ortho = null;
-  orthoInstallationDate.value = "";
+  orthoInstallationDate.value = new Date().toISOString().split("T")[0];
+  orthoBracketType.value = "normal";
+  orthoMonthlyPrice.value = "";
   orthoTableBody.innerHTML = "";
   setDirty();
 });

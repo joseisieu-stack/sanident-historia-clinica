@@ -1527,6 +1527,29 @@ button:focus-visible {
   margin-top: 18px;
 }
 
+.ortho-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.ortho-info-row label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ortho-info-row input,
+.ortho-info-row select {
+  padding: 5px 8px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
 .ortho-scroll {
   overflow-x: auto;
 }
