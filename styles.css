@@ -1349,7 +1349,8 @@ button:focus-visible {
   .legend,
   .selection-box,
   #saveStatus,
-  .receipt-card {
+  .receipt-card,
+  .ortho-card {
     display: none !important;
   }
 

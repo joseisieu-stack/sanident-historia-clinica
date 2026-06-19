@@ -188,6 +188,7 @@ const patientPhotoPreview = document.querySelector("#patientPhotoPreview");
 const auxiliaryExamsInput = document.querySelector("#auxiliaryExamsInput");
 const examList = document.querySelector("#examList");
 const orthoInstallationDate = document.querySelector("#orthoInstallationDate");
+orthoInstallationDate.value = new Date().toISOString().split("T")[0];
 const orthoTableBody = document.querySelector("#orthoTableBody");
 const addOrthoControlButton = document.querySelector("#addOrthoControlButton");
 const restorationDetail = document.querySelector("#restorationDetail");
@@ -471,7 +472,9 @@ function applySession(session) {
   document.querySelector("#saveButton").classList.toggle("hidden", readonly);
   document.querySelector("#printButton").classList.toggle("hidden", readonly);
   document.querySelector("#printOrderButton").classList.toggle("hidden", readonly);
+  document.querySelector("#printOrthoButton").classList.toggle("hidden", readonly);
   document.querySelector("#addBudgetItemButton").classList.toggle("hidden", readonly);
+  document.querySelector("#addOrthoControlButton").classList.toggle("hidden", readonly);
   document.querySelector("#addAppointmentButton").classList.toggle("hidden", readonly);
   document.querySelector("#clearButton").classList.toggle("hidden", readonly);
   document.querySelector("#openChartButton").classList.toggle("hidden", readonly);
@@ -1187,6 +1190,64 @@ async function printRecord() {
   document.body.classList.add("print-mode");
   window.print();
 }
+
+document.querySelector("#printOrthoButton").addEventListener("click", async () => {
+  const session = currentSession();
+  if (session?.role === "Invitado") return;
+  const name = document.querySelector("#clinicalForm input[name='fullName']").value || "Paciente";
+  const installDate = orthoInstallationDate.value || "—";
+  const rows = Array.from(orthoTableBody.querySelectorAll("tr"));
+  const items = rows.map((r) => ({
+    num: r.dataset.id,
+    date: r.querySelector(".ortho-expected")?.value || "—",
+    attended: r.querySelector(".comp-badge")?.textContent.trim() || "Pendiente",
+    procedures: r.querySelector(".ortho-proc")?.value || "",
+    approval: r.querySelector(".approve-check")?.checked ? "✓" : "",
+  }));
+  const logoUrl = `${location.origin}${location.pathname.replace(/\/+$/, "")}/images/logo-del-consul.jpeg`;
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <!DOCTYPE html><html lang="es">
+    <head><meta charset="utf-8"><title>Control de Ortodoncia</title>
+    <style>
+      @page { margin: 10mm; }
+      body { font-family: 'Courier New', monospace; font-size: 13px; margin:0; padding:20px; color:#000; }
+      .top { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+      .top img { width:50px; height:50px; border-radius:50%; object-fit:cover; }
+      .clinic { font-weight:800; font-size:15px; text-transform:uppercase; }
+      .sub { font-size:11px; color:#555; }
+      h2 { font-size:16px; margin:0 0 4px; }
+      .info { margin-bottom:12px; font-size:13px; }
+      table { width:100%; border-collapse:collapse; }
+      th { border-bottom:2px solid #000; padding:5px 4px; text-align:left; font-size:11px; text-transform:uppercase; }
+      th:nth-child(1) { width:30px; text-align:center; }
+      th:nth-child(2) { width:100px; }
+      th:nth-child(3) { width:60px; text-align:center; }
+      th:nth-child(5) { width:30px; text-align:center; }
+      td { padding:4px; border-bottom:1px dotted #ccc; font-size:12px; }
+      td:nth-child(1) { text-align:center; }
+      td:nth-child(3) { text-align:center; }
+      td:nth-child(5) { text-align:center; }
+    </style></head><body>
+      <div class="top">
+        <img src="${logoUrl}" alt="Logo">
+        <div>
+          <div class="clinic">SANI DENT</div>
+          <div class="sub">Odontolog&iacute;a con tecnolog&iacute;a</div>
+          <div class="sub">JR. SAN CRISTOBAL NRO. 301 - PASCO</div>
+        </div>
+      </div>
+      <h2>Control de Ortodoncia</h2>
+      <div class="info"><strong>Paciente:</strong> ${name} &nbsp;|&nbsp; <strong>Instalaci&oacute;n:</strong> ${installDate}</div>
+      <table>
+        <tr><th>N°</th><th>Fecha</th><th>¿Cumpli&oacute;?</th><th>Procedimientos</th><th>V°B°</th></tr>
+        ${items.map((i) => `<tr><td>${i.num}</td><td>${i.date}</td><td>${i.attended}</td><td>${escapeHtml(i.procedures)}</td><td>${i.approval}</td></tr>`).join("")}
+      </table>
+      <script>window.print();window.close();<` + `/script>
+    </body></html>
+  `);
+  win.document.close();
+});
 
 document.querySelector("#printOrderButton").addEventListener("click", async () => {
   const session = currentSession();
