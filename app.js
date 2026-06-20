@@ -625,13 +625,6 @@ function renderOrthodontics(data) {
       data.controls = all;
     }
   }
-      }
-    }
-    if (completed.length || nextPending.length) {
-      const all = [...completed, ...nextPending].map((c, i) => ({ ...c, id: i + 1 }));
-      data.controls = all;
-    }
-  }
   state.ortho = data;
   renderOrthoControls(data.controls || []);
 }
