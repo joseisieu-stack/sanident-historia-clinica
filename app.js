@@ -594,11 +594,32 @@ function renderOrthodontics(data) {
   orthoInstallationDate.value = data.installationDate || "";
   orthoBracketType.value = data.bracketType || "normal";
   orthoMonthlyPrice.value = data.monthlyPrice || "";
-  // Prune old 24-row data: keep completed controls + at most 1 pending
+  // Prune old 24-row data: keep completed controls + at most 1 pending with valid date
   if (data.controls?.length > 1) {
-    const completed = data.controls.filter((c) => c.attended !== null);
+    const validDate = (str) => {
+      const parts = (str || "").split("-");
+      if (parts.length !== 3) return false;
+      const y = parseInt(parts[0], 10);
+      return !isNaN(y) && y >= 2000 && y <= 2100;
+    };
+    const completed = data.controls.filter((c) => c.attended !== null && validDate(c.expectedDate));
     const pending = data.controls.filter((c) => c.attended === null);
-    const nextPending = pending.length ? [pending[0]] : [];
+    const nextPending = [];
+    if (pending.length) {
+      const firstPending = pending[0];
+      if (validDate(firstPending.expectedDate)) {
+        nextPending.push(firstPending);
+      } else if (completed.length) {
+        // Generate next date from last completed
+        const last = completed[completed.length - 1];
+        if (validDate(last.expectedDate)) {
+          const parts = last.expectedDate.split("-");
+          const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+          d.setMonth(d.getMonth() + 1);
+          nextPending.push({ ...firstPending, expectedDate: d.toISOString().slice(0, 10), attendedDate: d.toISOString().slice(0, 10) });
+        }
+      }
+    }
     if (completed.length || nextPending.length) {
       const all = [...completed, ...nextPending].map((c, i) => ({ ...c, id: i + 1 }));
       data.controls = all;
