@@ -500,6 +500,7 @@ async function startSession(email, password) {
   });
   setToken(data.token);
   applySession(data.user);
+  api("/patients/deduplicate", { method: "POST" }).catch(() => {});
   return data.user;
 }
 
@@ -1994,3 +1995,4 @@ fillBudgetData();
 fillAppointmentsData();
 renderPatientList();
 applySession(readSession());
+api("/patients/deduplicate", { method: "POST" }).catch(() => {});
