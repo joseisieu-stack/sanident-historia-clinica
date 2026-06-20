@@ -1780,24 +1780,23 @@ addAppointmentButton.addEventListener("click", () => {
   appointmentItems.appendChild(createAppointmentRow());
   setDirty();
 });
-loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const email = loginUser.value.trim().toLowerCase();
-  const password = loginPassword.value;
+async function handleLogin(event) {
+  if (event) event.preventDefault();
+  const email = (loginUser?.value || "").trim().toLowerCase();
+  const password = loginPassword?.value || "";
   const loading = document.querySelector("#loginLoading");
-
-  loading.classList.remove("hidden");
-  loginMessage.textContent = "";
-
+  if (loading) loading.classList.remove("hidden");
+  if (loginMessage) loginMessage.textContent = "";
   try {
     const user = await startSession(email, password);
-    loginRole.value = user.role;
+    if (loginRole) loginRole.value = user.role;
   } catch {
-    loginMessage.textContent = "Usuario o contraseña incorrectos";
+    if (loginMessage) loginMessage.textContent = "Usuario o contraseña incorrectos";
   } finally {
-    loading.classList.add("hidden");
+    if (loading) loading.classList.add("hidden");
   }
-});
+}
+loginForm?.addEventListener("submit", handleLogin);
 
 document.querySelector("#saveButton").addEventListener("click", async () => { await saveRecord(); });
 document.querySelector("#printButton").addEventListener("click", async () => { await printRecord(); });
@@ -1813,15 +1812,13 @@ manageUsersButton.addEventListener("click", async () => {
 document.querySelector("#cancelEditButton").addEventListener("click", cancelEdit);
 window.addEventListener("afterprint", () => document.body.classList.remove("print-mode"));
 
-document.addEventListener("click", (event) => {
-  const btn = event.target.closest(".toggle-pass");
-  if (!btn) return;
-  const input = document.querySelector(`#${btn.dataset.target}`);
+document.querySelector(".toggle-pass")?.addEventListener("click", function () {
+  const input = document.querySelector(`#${this.dataset.target}`);
   if (!input) return;
   const isPassword = input.type === "password";
   input.type = isPassword ? "text" : "password";
-  btn.textContent = isPassword ? "🙈" : "👁";
-  btn.setAttribute("aria-label", isPassword ? "Ocultar contraseña" : "Mostrar contraseña");
+  this.textContent = isPassword ? "🙈" : "👁";
+  this.setAttribute("aria-label", isPassword ? "Ocultar contraseña" : "Mostrar contraseña");
 });
 
 userForm.addEventListener("submit", async (event) => {
@@ -1986,13 +1983,16 @@ document.querySelector("#resetChartButton").addEventListener("click", () => {
   setDirty();
 });
 
-renderFindingButtons();
-updateOptionPanels();
-renderOdontogram();
-renderPatientPhoto();
-renderExamList();
-fillBudgetData();
-fillAppointmentsData();
-renderPatientList();
-applySession(readSession());
-api("/patients/deduplicate", { method: "POST" }).catch(() => {});
+try {
+  renderFindingButtons();
+  updateOptionPanels();
+  renderOdontogram();
+  renderPatientPhoto();
+  renderExamList();
+  fillBudgetData();
+  fillAppointmentsData();
+  renderPatientList();
+  applySession(readSession());
+} catch (e) {
+  console.error("Error en inicializacion:", e);
+}
