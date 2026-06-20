@@ -75,6 +75,9 @@ async function migrate() {
   // Add ortho_json column if upgrading existing table
   await query(`ALTER TABLE clinical_records ADD COLUMN IF NOT EXISTS ortho_json TEXT`);
 
+  // Clean up old 24-row ortho data from all existing records
+  try { await query(`UPDATE clinical_records SET ortho_json = '{}' WHERE ortho_json IS NOT NULL AND ortho_json != '{}'`); } catch (e) { /* ignore */ }
+
   // Migrate patient id from SERIAL to TEXT to support UUIDs
   await query(`ALTER TABLE clinical_records DROP CONSTRAINT IF EXISTS clinical_records_patient_id_fkey`);
   await query(`ALTER TABLE patient_files DROP CONSTRAINT IF EXISTS patient_files_patient_id_fkey`);
