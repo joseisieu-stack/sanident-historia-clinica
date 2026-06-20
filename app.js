@@ -682,10 +682,10 @@ function bindOrthoRowEvents() {
 
 function generateOrthoControls(installationDate, existingControls) {
   if (existingControls?.length) return existingControls;
-  const start = new Date(installationDate);
-  const d = new Date(start);
-  d.setMonth(d.getMonth() + 1);
-  const expected = d.toISOString().slice(0, 10);
+  const parts = installationDate.split("-");
+  const start = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  start.setMonth(start.getMonth() + 1);
+  const expected = start.toISOString().slice(0, 10);
   return [{ id: 1, expectedDate: expected, attended: null, attendedDate: expected, procedures: "", approval: false }];
 }
 
@@ -702,7 +702,8 @@ function ensureNextControl(tr) {
   if (hasNext) return;
   const dateInput = tr.querySelector(".ortho-expected");
   const prevDate = dateInput?.value || new Date().toISOString().slice(0, 10);
-  const d = new Date(prevDate);
+  const parts = prevDate.split("-");
+  const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
   d.setMonth(d.getMonth() + 1);
   const nextDate = d.toISOString().slice(0, 10);
   state.ortho.controls.push({ id: lastId + 1, expectedDate: nextDate, attended: null, attendedDate: nextDate, procedures: "", approval: false });
@@ -715,10 +716,26 @@ function updateNextControlDisplay() {
   if (!el) return;
   if (!state.ortho?.controls?.length) { el.textContent = ""; return; }
   const last = state.ortho.controls[state.ortho.controls.length - 1];
-  const nextDate = last.expectedDate || new Date().toISOString().slice(0, 10);
-  const d = new Date(nextDate);
-  d.setMonth(d.getMonth() + 1);
-  el.textContent = `Próximo control: ${d.toLocaleDateString("es-PE", { timeZone: "UTC" })}`;
+  if (!last) { el.textContent = ""; return; }
+  let label = "";
+  if (last.attended === null && last.expectedDate) {
+    label = `Próximo control: ${formatDateEs(last.expectedDate)}`;
+  } else if (last.attended !== null && last.expectedDate) {
+    const parts = last.expectedDate.split("-");
+    if (parts.length === 3) {
+      const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+      d.setMonth(d.getMonth() + 1);
+      label = `Próximo control: ${d.toLocaleDateString("es-PE", { timeZone: "UTC" })}`;
+    }
+  }
+  el.textContent = label;
+}
+
+function formatDateEs(dateStr) {
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return dateStr;
+  const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  return d.toLocaleDateString("es-PE", { timeZone: "UTC" });
 }
 
 function showToast(msg) {
