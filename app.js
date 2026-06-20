@@ -99,7 +99,7 @@ const surfaceNames = {
 };
 
 const state = {
-  activeTool: "restoration",
+  activeTool: "caries",
   activeFinding: "",
   pendingSpanStart: "",
   selectedTooth: "",
@@ -357,7 +357,7 @@ function renderFindingButtons() {
   primaryTools.forEach((tool) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = `finding-chip tool-chip ${tool.color}-chip${tool.tool === "restoration" ? " active" : ""}`;
+    button.className = `finding-chip tool-chip ${tool.color}-chip${tool.tool === "caries" ? " active" : ""}`;
     if (tool.tool) button.dataset.tool = tool.tool;
     if (tool.finding) button.dataset.finding = tool.finding;
     button.title = tool.label;
