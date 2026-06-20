@@ -716,19 +716,11 @@ function updateNextControlDisplay() {
   if (!el) return;
   if (!state.ortho?.controls?.length) { el.textContent = ""; return; }
   const last = state.ortho.controls[state.ortho.controls.length - 1];
-  if (!last) { el.textContent = ""; return; }
-  let label = "";
-  if (last.attended === null && last.expectedDate) {
-    label = `Próximo control: ${formatDateEs(last.expectedDate)}`;
-  } else if (last.attended !== null && last.expectedDate) {
-    const parts = last.expectedDate.split("-");
-    if (parts.length === 3) {
-      const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-      d.setMonth(d.getMonth() + 1);
-      label = `Próximo control: ${d.toLocaleDateString("es-PE", { timeZone: "UTC" })}`;
-    }
-  }
-  el.textContent = label;
+  if (!last?.expectedDate) { el.textContent = ""; return; }
+  const parts = last.expectedDate.split("-");
+  const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  d.setMonth(d.getMonth() + 1);
+  el.textContent = `Próximo control: ${d.toLocaleDateString("es-PE", { timeZone: "UTC" })}`;
 }
 
 function formatDateEs(dateStr) {
