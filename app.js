@@ -1185,7 +1185,7 @@ function renderOdontogramSummary() {
   if (!entries.length) { el.innerHTML = ""; return; }
   el.innerHTML = entries.map(([label, count]) =>
     `<span class="summary-item"><span class="summary-count">${count}</span> ${label}</span>`
-  ).join(" · ");
+  ).join("");
 }
 
 function setDirty() {

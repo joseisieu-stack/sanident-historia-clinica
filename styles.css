@@ -965,13 +965,12 @@ button:focus-visible {
 .odontogram-summary {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
-  margin-top: 14px;
-  padding: 10px 14px;
-  background: #f8f9fb;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: var(--text);
+  gap: 10px;
+  margin-top: 18px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #fef6f0 100%);
+  border-radius: 12px;
+  border: 1px solid #e0e7ef;
 }
 
 .odontogram-summary:empty {
@@ -981,13 +980,39 @@ button:focus-visible {
 .odontogram-summary .summary-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  background: #fff;
+  padding: 6px 14px 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #dce3ec;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .odontogram-summary .summary-count {
-  font-weight: 700;
-  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 14px;
+  background: #d92332;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  line-height: 1;
 }
+
+.odontogram-summary .summary-item:nth-child(1) .summary-count { background: #d92332; }
+.odontogram-summary .summary-item:nth-child(2) .summary-count { background: #1769e0; }
+.odontogram-summary .summary-item:nth-child(3) .summary-count { background: #e67e22; }
+.odontogram-summary .summary-item:nth-child(4) .summary-count { background: #27ae60; }
+.odontogram-summary .summary-item:nth-child(5) .summary-count { background: #8e44ad; }
+.odontogram-summary .summary-item:nth-child(6) .summary-count { background: #2c3e50; }
+.odontogram-summary .summary-item:nth-child(7) .summary-count { background: #c0392b; }
+.odontogram-summary .summary-item:nth-child(8) .summary-count { background: #2980b9; }
+.odontogram-summary .summary-item:nth-child(9) .summary-count { background: #d35400; }
+.odontogram-summary .summary-item:nth-child(10) .summary-count { background: #16a085; }
 
 .odontogram-toolbar .primary-button {
   background: #b894e0;
