@@ -683,7 +683,12 @@ function bindOrthoRowEvents() {
 function generateOrthoControls(installationDate, existingControls) {
   if (existingControls?.length) return existingControls;
   const parts = installationDate.split("-");
-  const start = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  if (parts.length !== 3) return [{ id: 1, expectedDate: "", attended: null, attendedDate: "", procedures: "", approval: false }];
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const d = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(d) || y < 2000 || y > 2100) return [{ id: 1, expectedDate: "", attended: null, attendedDate: "", procedures: "", approval: false }];
+  const start = new Date(y, m - 1, d);
   start.setMonth(start.getMonth() + 1);
   const expected = start.toISOString().slice(0, 10);
   return [{ id: 1, expectedDate: expected, attended: null, attendedDate: expected, procedures: "", approval: false }];
@@ -701,11 +706,17 @@ function ensureNextControl(tr) {
   const hasNext = state.ortho.controls.some((c) => c.id === lastId + 1);
   if (hasNext) return;
   const dateInput = tr.querySelector(".ortho-expected");
-  const prevDate = dateInput?.value || new Date().toISOString().slice(0, 10);
+  let prevDate = dateInput?.value || "";
+  if (!prevDate) prevDate = new Date().toISOString().slice(0, 10);
   const parts = prevDate.split("-");
-  const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-  d.setMonth(d.getMonth() + 1);
-  const nextDate = d.toISOString().slice(0, 10);
+  if (parts.length !== 3) return;
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const d = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(d) || y < 2000 || y > 2100) return;
+  const dt = new Date(y, m - 1, d);
+  dt.setMonth(dt.getMonth() + 1);
+  const nextDate = dt.toISOString().slice(0, 10);
   state.ortho.controls.push({ id: lastId + 1, expectedDate: nextDate, attended: null, attendedDate: nextDate, procedures: "", approval: false });
   renderOrthoControls(state.ortho.controls);
   updateNextControlDisplay();
@@ -718,17 +729,17 @@ function updateNextControlDisplay() {
   const last = state.ortho.controls[state.ortho.controls.length - 1];
   if (!last?.expectedDate) { el.textContent = ""; return; }
   const parts = last.expectedDate.split("-");
-  const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-  d.setMonth(d.getMonth() + 1);
-  el.textContent = `Próximo control: ${d.toLocaleDateString("es-PE", { timeZone: "UTC" })}`;
+  if (parts.length !== 3) { el.textContent = ""; return; }
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const d = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(d) || y < 2000 || y > 2100) { el.textContent = ""; return; }
+  const date = new Date(y, m - 1, d);
+  date.setMonth(date.getMonth() + 1);
+  el.textContent = `Próximo control: ${date.toLocaleDateString("es-PE", { timeZone: "UTC" })}`;
 }
 
-function formatDateEs(dateStr) {
-  const parts = dateStr.split("-");
-  if (parts.length !== 3) return dateStr;
-  const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-  return d.toLocaleDateString("es-PE", { timeZone: "UTC" });
-}
+
 
 function showToast(msg) {
   let toast = document.querySelector(".toast-msg");
