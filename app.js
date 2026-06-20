@@ -599,7 +599,7 @@ function renderOrthodontics(data) {
 
 function renderOrthoControls(controls) {
   orthoTableBody.innerHTML = "";
-  if (!controls.length) return;
+  if (!controls.length) { updateNextControlDisplay(); return; }
   controls.forEach((c) => {
     const tr = document.createElement("tr");
     tr.dataset.id = c.id;
@@ -615,6 +615,7 @@ function renderOrthoControls(controls) {
     orthoTableBody.appendChild(tr);
   });
   bindOrthoRowEvents();
+  updateNextControlDisplay();
 }
 
 function complianceBadge(c) {
@@ -634,6 +635,7 @@ function bindOrthoRowEvents() {
         tr.dataset.attended = "";
       } else {
         tr.dataset.attended = "true";
+        ensureNextControl(tr);
       }
       const id = Number(tr.dataset.id);
       const control = state.ortho?.controls?.find((c) => c.id === id);
@@ -669,29 +671,44 @@ function bindOrthoRowEvents() {
 }
 
 function generateOrthoControls(installationDate, existingControls) {
-  const controls = [];
+  if (existingControls?.length) return existingControls;
   const start = new Date(installationDate);
-  const existingMap = {};
-  if (existingControls) {
-    existingControls.forEach((c) => { existingMap[c.id] = c; });
-  }
-  for (let i = 1; i <= 24; i++) {
-    const d = new Date(start);
-    d.setMonth(d.getMonth() + i);
-    const expected = d.toISOString().slice(0, 10);
-    if (existingMap[i]) {
-      controls.push({ ...existingMap[i], id: i });
-    } else {
-      controls.push({ id: i, expectedDate: expected, attended: null, attendedDate: expected, procedures: "", approval: false });
-    }
-  }
-  return controls;
+  const d = new Date(start);
+  d.setMonth(d.getMonth() + 1);
+  const expected = d.toISOString().slice(0, 10);
+  return [{ id: 1, expectedDate: expected, attended: null, attendedDate: expected, procedures: "", approval: false }];
 }
 
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+function ensureNextControl(tr) {
+  if (!state.ortho) state.ortho = { installationDate: "", controls: [] };
+  const lastId = Number(tr.dataset.id);
+  const hasNext = state.ortho.controls.some((c) => c.id === lastId + 1);
+  if (hasNext) return;
+  const dateInput = tr.querySelector(".ortho-expected");
+  const prevDate = dateInput?.value || new Date().toISOString().slice(0, 10);
+  const d = new Date(prevDate);
+  d.setMonth(d.getMonth() + 1);
+  const nextDate = d.toISOString().slice(0, 10);
+  state.ortho.controls.push({ id: lastId + 1, expectedDate: nextDate, attended: null, attendedDate: nextDate, procedures: "", approval: false });
+  renderOrthoControls(state.ortho.controls);
+  updateNextControlDisplay();
+}
+
+function updateNextControlDisplay() {
+  const el = document.querySelector("#nextControlDisplay");
+  if (!el) return;
+  if (!state.ortho?.controls?.length) { el.textContent = ""; return; }
+  const last = state.ortho.controls[state.ortho.controls.length - 1];
+  const nextDate = last.expectedDate || new Date().toISOString().slice(0, 10);
+  const d = new Date(nextDate);
+  d.setMonth(d.getMonth() + 1);
+  el.textContent = `Próximo control: ${d.toLocaleDateString("es-PE", { timeZone: "UTC" })}`;
 }
 
 function showToast(msg) {
@@ -1847,6 +1864,7 @@ document.querySelector("#clearButton").addEventListener("click", () => {
   orthoBracketType.value = "normal";
   orthoMonthlyPrice.value = "";
   orthoTableBody.innerHTML = "";
+  updateNextControlDisplay();
   setDirty();
 });
 
@@ -1858,6 +1876,7 @@ orthoInstallationDate.addEventListener("change", () => {
   } else {
     state.ortho = null;
     orthoTableBody.innerHTML = "";
+    updateNextControlDisplay();
   }
   setDirty();
 });
