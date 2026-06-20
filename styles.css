@@ -962,6 +962,33 @@ button:focus-visible {
   flex-wrap: wrap;
 }
 
+.odontogram-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #f8f9fb;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.odontogram-summary:empty {
+  display: none;
+}
+
+.odontogram-summary .summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.odontogram-summary .summary-count {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
 .odontogram-toolbar .primary-button {
   background: #b894e0;
 }

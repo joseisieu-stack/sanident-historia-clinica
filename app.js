@@ -337,6 +337,7 @@ function renderOdontogram() {
   odontogram.appendChild(createArch("Denticion temporal inferior", teeth.temporaryLower));
   odontogram.appendChild(createArch("Arcada inferior", teeth.lower));
   refreshToothStyles();
+  renderOdontogramSummary();
 }
 
 function sentenceLabel(text = "") {
@@ -1112,6 +1113,79 @@ function refreshToothStyles() {
       surface.classList.toggle("red-outline", status?.color === "red" && status?.style === "outline");
     });
   });
+  renderOdontogramSummary();
+}
+
+function renderOdontogramSummary() {
+  const allTeeth = [...teeth.upper, ...teeth.temporaryUpper, ...teeth.temporaryLower, ...teeth.lower];
+  const counts = {};
+
+  allTeeth.forEach((n) => {
+    const rec = state.chart[n];
+    if (!rec) return;
+
+    const surfaces = Object.values(rec.surfaces || {});
+    const caries = surfaces.filter((s) => {
+      const norm = normalizeSurfaceStatus(s);
+      return norm?.kind === "caries";
+    }).length;
+    if (caries) counts["Caries"] = (counts["Caries"] || 0) + caries;
+
+    const curaciones = surfaces.filter((s) => {
+      const norm = normalizeSurfaceStatus(s);
+      return norm?.kind === "restoration";
+    }).length;
+    if (curaciones) counts["Curaciones"] = (counts["Curaciones"] || 0) + curaciones;
+
+    const desgaste = surfaces.filter((s) => {
+      const norm = normalizeSurfaceStatus(s);
+      return norm?.kind === "wear";
+    }).length;
+    if (desgaste) counts["Desgaste"] = (counts["Desgaste"] || 0) + desgaste;
+
+    const finding = rec.finding || "";
+    if (finding.startsWith("endo-") || finding.startsWith("pulpectomy") || finding.startsWith("pulpotomy")) {
+      counts["Endodoncias"] = (counts["Endodoncias"] || 0) + 1;
+    }
+    if (finding === "missing-dne" || finding === "missing-dex" || finding === "missing-dao" || finding === "missing") {
+      counts["Ausentes"] = (counts["Ausentes"] || 0) + 1;
+    }
+    if (finding === "extraction") {
+      counts["Extracciones indicadas"] = (counts["Extracciones indicadas"] || 0) + 1;
+    }
+    if (finding === "root-remnant") {
+      counts["Remanentes radiculares"] = (counts["Remanentes radiculares"] || 0) + 1;
+    }
+    if (finding.startsWith("crown")) {
+      counts["Coronas"] = (counts["Coronas"] || 0) + 1;
+    }
+    if (finding.startsWith("implant")) {
+      counts["Implantes"] = (counts["Implantes"] || 0) + 1;
+    }
+    if (finding.startsWith("sealant")) {
+      counts["Sellantes"] = (counts["Sellantes"] || 0) + 1;
+    }
+    if (finding.startsWith("post-core")) {
+      counts["Espigos muñón"] = (counts["Espigos muñón"] || 0) + 1;
+    }
+    if (finding.startsWith("mobility")) {
+      counts["Movilidad"] = (counts["Movilidad"] || 0) + 1;
+    }
+    if (finding === "fracture") {
+      counts["Fracturas"] = (counts["Fracturas"] || 0) + 1;
+    }
+    if (finding.startsWith("fixed-prosthesis") || finding.startsWith("removable-prosthesis") || finding.startsWith("complete-prosthesis")) {
+      counts["Prótesis"] = (counts["Prótesis"] || 0) + 1;
+    }
+  });
+
+  const el = document.querySelector("#odontogramSummary");
+  if (!el) return;
+  const entries = Object.entries(counts).filter(([, v]) => v > 0);
+  if (!entries.length) { el.innerHTML = ""; return; }
+  el.innerHTML = entries.map(([label, count]) =>
+    `<span class="summary-item"><span class="summary-count">${count}</span> ${label}</span>`
+  ).join(" · ");
 }
 
 function setDirty() {
