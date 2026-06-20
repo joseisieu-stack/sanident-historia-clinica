@@ -583,11 +583,12 @@ function getOrthoData() {
 
 function renderOrthodontics(data) {
   if (!data || (!data.installationDate && !data.controls?.length)) {
-    orthoInstallationDate.value = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
+    orthoInstallationDate.value = today;
     orthoBracketType.value = "normal";
     orthoMonthlyPrice.value = "";
-    orthoTableBody.innerHTML = "";
-    state.ortho = null;
+    state.ortho = { installationDate: today, controls: generateOrthoControls(today, []) };
+    renderOrthoControls(state.ortho.controls);
     return;
   }
   orthoInstallationDate.value = data.installationDate || "";
@@ -1889,12 +1890,12 @@ document.querySelector("#clearButton").addEventListener("click", () => {
   renderExamList();
   renderPatientList();
   refreshToothStyles();
-  state.ortho = null;
-  orthoInstallationDate.value = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
+  state.ortho = { installationDate: today, controls: generateOrthoControls(today, []) };
+  orthoInstallationDate.value = today;
   orthoBracketType.value = "normal";
   orthoMonthlyPrice.value = "";
-  orthoTableBody.innerHTML = "";
-  updateNextControlDisplay();
+  renderOrthoControls(state.ortho.controls);
   setDirty();
 });
 
