@@ -593,6 +593,16 @@ function renderOrthodontics(data) {
   orthoInstallationDate.value = data.installationDate || "";
   orthoBracketType.value = data.bracketType || "normal";
   orthoMonthlyPrice.value = data.monthlyPrice || "";
+  // Prune old 24-row data: keep completed controls + at most 1 pending
+  if (data.controls?.length > 1) {
+    const completed = data.controls.filter((c) => c.attended !== null);
+    const pending = data.controls.filter((c) => c.attended === null);
+    const nextPending = pending.length ? [pending[0]] : [];
+    if (completed.length || nextPending.length) {
+      const all = [...completed, ...nextPending].map((c, i) => ({ ...c, id: i + 1 }));
+      data.controls = all;
+    }
+  }
   state.ortho = data;
   renderOrthoControls(data.controls || []);
 }
