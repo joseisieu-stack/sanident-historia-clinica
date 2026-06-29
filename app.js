@@ -122,6 +122,14 @@ const defaultAdmin = {
   active: true,
 };
 const tokenKey = "sanident.token";
+const receiptKey = "sanident.receipt";
+
+function nextReceipt() {
+  const cur = Number(localStorage.getItem(receiptKey)) || 0;
+  const num = cur + 1;
+  localStorage.setItem(receiptKey, String(num));
+  return num;
+}
 
 function getToken() {
   return sessionStorage.getItem(tokenKey);
@@ -1465,7 +1473,7 @@ document.querySelector("#printOrderButton").addEventListener("click", async () =
         <div class="right">
           <div class="ruc">RUC: 10449297917</div>
           <div class="nota-title">Recibo de Atencion</div>
-          <div class="nota-num">N&deg; 001</div>
+          <div class="nota-num">N&deg; ${String(nextReceipt()).padStart(3, "0")}</div>
         </div>
       </div>
       <div class="patient-name">${name}</div>
