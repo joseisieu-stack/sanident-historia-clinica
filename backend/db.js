@@ -75,15 +75,6 @@ async function migrate() {
   // Add ortho_json column if upgrading existing table
   await query(`ALTER TABLE clinical_records ADD COLUMN IF NOT EXISTS ortho_json TEXT`);
 
-  // Migrate patient id from SERIAL to TEXT to support UUIDs
-  await query(`ALTER TABLE clinical_records DROP CONSTRAINT IF EXISTS clinical_records_patient_id_fkey`);
-  await query(`ALTER TABLE patient_files DROP CONSTRAINT IF EXISTS patient_files_patient_id_fkey`);
-  await query(`ALTER TABLE patients ALTER COLUMN id TYPE TEXT`);
-  await query(`ALTER TABLE clinical_records ALTER COLUMN patient_id TYPE TEXT`);
-  await query(`ALTER TABLE patient_files ALTER COLUMN patient_id TYPE TEXT`);
-  await query(`ALTER TABLE clinical_records ADD FOREIGN KEY (patient_id) REFERENCES patients(id)`);
-  await query(`ALTER TABLE patient_files ADD FOREIGN KEY (patient_id) REFERENCES patients(id)`);
-
   await query(`
     CREATE TABLE IF NOT EXISTS patient_files (
       id SERIAL PRIMARY KEY,
@@ -93,6 +84,15 @@ async function migrate() {
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
   `);
+
+  // Migrate patient id from SERIAL to TEXT to support UUIDs
+  await query(`ALTER TABLE clinical_records DROP CONSTRAINT IF EXISTS clinical_records_patient_id_fkey`);
+  await query(`ALTER TABLE patient_files DROP CONSTRAINT IF EXISTS patient_files_patient_id_fkey`);
+  await query(`ALTER TABLE patients ALTER COLUMN id TYPE TEXT`);
+  await query(`ALTER TABLE clinical_records ALTER COLUMN patient_id TYPE TEXT`);
+  await query(`ALTER TABLE patient_files ALTER COLUMN patient_id TYPE TEXT`);
+  await query(`ALTER TABLE clinical_records ADD FOREIGN KEY (patient_id) REFERENCES patients(id)`);
+  await query(`ALTER TABLE patient_files ADD FOREIGN KEY (patient_id) REFERENCES patients(id)`);
 
   // Seed roles
   await query(`INSERT INTO roles (name, description) VALUES ('administrador', 'Acceso completo') ON CONFLICT (name) DO NOTHING`);
