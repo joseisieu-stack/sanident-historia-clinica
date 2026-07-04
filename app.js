@@ -144,12 +144,21 @@ async function api(path, options = {}) {
   const headers = { "Content-Type": "application/json", ...options.headers };
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Error de conexión" }));
-    throw new Error(err.error || `Error ${res.status}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
+  try {
+    const res = await fetch(`${API_URL}${path}`, { ...options, headers, signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: "Error de conexión" }));
+      throw new Error(err.error || `Error ${res.status}`);
+    }
+    return res.json();
+  } catch (e) {
+    clearTimeout(timeout);
+    if (e.name === "AbortError") throw new Error("El servidor no responde, intenta de nuevo");
+    throw e;
   }
-  return res.json();
 }
 const loginScreen = document.querySelector("#loginScreen");
 const loginForm = document.querySelector("#loginForm");
