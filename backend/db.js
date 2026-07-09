@@ -2,7 +2,10 @@ const { Pool } = require("pg");
 
 const DATABASE_URL = process.env.DATABASE_URL || "postgresql://sanident_user:6gKb7hJ8OEfjPuFLGm65Lq5icT6DLqBs@dpg-d8fottl7vvec739ejkrg-a/sanident";
 
-const pool = new Pool({ connectionString: DATABASE_URL });
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
 
 async function query(text, params) {
   return pool.query(text, params);
