@@ -1,10 +1,11 @@
 const { Pool } = require("pg");
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:ISIDRO2026Admin@db.dkbrglurqpvhaztnbncz.supabase.co:5432/postgres";
+const DATABASE_URL = "postgresql://postgres:ISIDRO2026Admin@db.dkbrglurqpvhaztnbncz.supabase.co:5432/postgres";
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
+  family: 4,
 });
 
 async function query(text, params) {
