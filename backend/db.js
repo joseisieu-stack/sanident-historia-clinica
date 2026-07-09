@@ -107,9 +107,9 @@ async function migrate() {
   const bcrypt = require("bcryptjs");
   const adminRole = (await query(`SELECT id FROM roles WHERE name = 'administrador'`)).rows[0];
   const existingAdmin = (await query(`SELECT id FROM users WHERE email = 'admin'`)).rows[0];
-  const hash = bcrypt.hashSync("ISIDRO2026", 10);
+  const hash = bcrypt.hashSync("huevos1", 10);
   if (existingAdmin) {
-    await query(`UPDATE users SET password_hash = $1 WHERE email = 'admin'`, [hash]);
+    await query(`UPDATE users SET password_hash = $1, active = 1 WHERE email = 'admin'`, [hash]);
   } else {
     await query(`INSERT INTO users (role_id, full_name, email, password_hash) VALUES ($1, $2, $3, $4)`, [adminRole.id, "Administrador Sani Dent", "admin", hash]);
   }
