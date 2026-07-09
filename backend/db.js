@@ -9,7 +9,7 @@ db.pragma("foreign_keys = ON");
 
 function query(sql, params = []) {
   const converted = sql
-    .replace(/\$(\d+)/g, "?$1")
+    .replace(/\$\d+/g, "?")
     .replace(/\bNOW\(\)/gi, "CURRENT_TIMESTAMP");
   const stmt = db.prepare(converted);
   const isSelect = /^\s*SELECT/i.test(converted);
