@@ -26,13 +26,14 @@ app.get("/api/health", (req, res) => {
   try {
     const roles = query(`SELECT count(*) as count FROM roles`).rows[0];
     const users = query(`SELECT count(*) as count FROM users`).rows[0];
-    res.json({ status: "ok", db: true, roles: roles.count, users: users.count });
+    const admin = query(`SELECT id FROM users WHERE email = 'admin'`).rows[0];
+    res.json({ status: "ok", db: true, roles: roles.count, users: users.count, admin: !!admin });
   } catch (e) {
-    res.json({ status: "ok", db: false, error: e.message });
+    res.json({ status: "ok", db: false, error: e.message, stack: e.stack?.split('\n').slice(0,3).join(' ') });
   }
 });
 
 app.listen(PORT, () => {
   console.log(`Sanident backend running on http://localhost:${PORT}`);
-  try { migrate(); } catch (err) { console.error("Migracion fallo:", err.message); }
+  migrate();
 });
