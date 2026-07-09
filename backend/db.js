@@ -5,11 +5,16 @@ const DATABASE_URL = "postgresql://postgres:ISIDRO2026Admin@db.dkbrglurqpvhaztnb
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  family: 4,
+  connectionTimeoutMillis: 15000,
 });
 
 async function query(text, params) {
-  return pool.query(text, params);
+  const client = await pool.connect();
+  try {
+    return await client.query(text, params);
+  } finally {
+    client.release();
+  }
 }
 
 async function migrate() {
