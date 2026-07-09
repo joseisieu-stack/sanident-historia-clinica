@@ -24,12 +24,12 @@ app.use("/api/records", recordRoutes);
 
 app.get("/api/health", (req, res) => {
   try {
-    const roles = query(`SELECT count(*) as count FROM roles`).rows[0];
-    const users = query(`SELECT count(*) as count FROM users`).rows[0];
-    const admin = query(`SELECT id FROM users WHERE email = 'admin'`).rows[0];
-    res.json({ status: "ok", db: true, roles: roles.count, users: users.count, admin: !!admin });
+    const r = query(`SELECT count(*) as c FROM roles`);
+    const u = query(`SELECT count(*) as c FROM users`);
+    const a = query(`SELECT id FROM users WHERE email = 'admin'`);
+    res.json({ status: "ok", roles: r.rows[0]?.c || 0, users: u.rows[0]?.c || 0, admin: !!a.rows[0] });
   } catch (e) {
-    res.json({ status: "ok", db: false, error: e.message, stack: e.stack?.split('\n').slice(0,3).join(' ') });
+    res.json({ status: "ok", db: false, error: e.message });
   }
 });
 
