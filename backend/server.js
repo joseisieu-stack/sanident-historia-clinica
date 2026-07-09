@@ -28,5 +28,5 @@ app.get("/api/health", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Sanident backend running on http://localhost:${PORT}`);
-  migrate().catch((err) => console.error("Migracion fallo:", err.message));
+  try { migrate(); } catch (err) { console.error("Migracion fallo:", err.message); }
 });
