@@ -77,15 +77,12 @@ function migrate() {
     INSERT OR IGNORE INTO roles (name, description) VALUES ('invitado', 'Acceso limitado de consulta');
   `);
 
-  const roleId = query(`SELECT id FROM roles WHERE name = 'administrador'`).rows?.[0]?.id;
-  if (!roleId) { console.error("No admin role found"); return; }
-
-  const existing = query(`SELECT id FROM users WHERE email = 'admin'`).rows[0];
   const hash = bcrypt.hashSync("huevos1", 10);
+  const existing = db.prepare("SELECT id FROM users WHERE email = ?").get("admin");
   if (existing) {
-    query(`UPDATE users SET password_hash = $1, active = 1 WHERE email = 'admin'`, [hash]);
+    db.prepare("UPDATE users SET password_hash = ?, active = 1 WHERE email = 'admin'").run(hash);
   } else {
-    query(`INSERT INTO users (role_id, full_name, email, password_hash) VALUES ($1, $2, $3, $4)`, [roleId, "Administrador", "admin", hash]);
+    db.prepare("INSERT INTO users (role_id, full_name, email, password_hash) VALUES (1, 'Administrador', 'admin', ?)").run(hash);
   }
 
   console.log("Base de datos lista");
