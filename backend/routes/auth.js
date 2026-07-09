@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { query } = require("../db");
+const { supabase } = require("../db");
 
 const router = express.Router();
 const SECRET = process.env.JWT_SECRET || "sanident-secret-key-cambiar-en-produccion";
@@ -13,13 +13,14 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Usuario y contraseña requeridos" });
     }
 
-    const result = await query(`
-      SELECT u.id, u.full_name, u.email, u.password_hash, u.active, r.name as role
-      FROM users u JOIN roles r ON u.role_id = r.id
-      WHERE u.email = $1 AND u.active = 1
-    `, [email]);
+    const { data: users, error } = await supabase
+      .from("users")
+      .select("id, full_name, email, password_hash, active, role:roles!inner(name)")
+      .eq("email", email)
+      .eq("active", 1);
 
-    const user = result.rows[0];
+    if (error) throw error;
+    const user = users?.[0];
     if (!user || !bcrypt.compareSync(password, user.password_hash)) {
       return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
     }
@@ -48,12 +49,14 @@ router.get("/users", async (req, res) => {
     if (decoded.role?.toLowerCase() !== "administrador") {
       return res.status(403).json({ error: "Solo administradores" });
     }
-    const result = await query(`
-      SELECT u.id, u.full_name, u.email, u.active, r.name as role
-      FROM users u JOIN roles r ON u.role_id = r.id
-      ORDER BY u.created_at DESC
-    `);
-    res.json(result.rows);
+
+    const { data: users, error } = await supabase
+      .from("users")
+      .select("id, full_name, email, active, role:roles(name)")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    res.json(users.map(u => ({ ...u, role: u.role?.name })));
   } catch (err) {
     if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
       return res.status(401).json({ error: "Token inválido" });
@@ -76,18 +79,23 @@ router.post("/users", async (req, res) => {
       return res.status(400).json({ error: "Nombre, usuario y contraseña requeridos" });
     }
 
-    const existing = (await query(`SELECT id FROM users WHERE email = $1`, [email])).rows[0];
-    if (existing) {
+    const { data: existing } = await supabase.from("users").select("id").eq("email", email);
+    if (existing?.length) {
       return res.status(400).json({ error: "Ese usuario ya existe" });
     }
 
-    const roleRow = (await query(`SELECT id FROM roles WHERE name = $1`, [(role || "doctor").toLowerCase()])).rows[0];
-    if (!roleRow) return res.status(400).json({ error: "Rol inválido" });
+    const { data: roleRow } = await supabase.from("roles").select("id").eq("name", (role || "doctor").toLowerCase());
+    if (!roleRow?.length) return res.status(400).json({ error: "Rol inválido" });
 
     const hash = bcrypt.hashSync(password, 10);
-    await query(`INSERT INTO users (role_id, full_name, email, password_hash) VALUES ($1, $2, $3, $4)`,
-      [roleRow.id, fullName, email, hash]);
+    const { error } = await supabase.from("users").insert({
+      role_id: roleRow[0].id,
+      full_name: fullName,
+      email,
+      password_hash: hash,
+    });
 
+    if (error) throw error;
     res.json({ success: true, message: "Usuario creado" });
   } catch (err) {
     if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
@@ -108,29 +116,29 @@ router.put("/users/:id", async (req, res) => {
 
     const { id } = req.params;
     const { fullName, email, password, role } = req.body;
-    const user = (await query(`SELECT email, active FROM users WHERE id = $1`, [id])).rows[0];
+
+    const { data: users } = await supabase.from("users").select("email, active").eq("id", id);
+    const user = users?.[0];
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
     if (user.email === "admin") return res.status(400).json({ error: "No puedes editar al administrador principal" });
 
     if (email && email !== user.email) {
-      const existing = (await query(`SELECT id FROM users WHERE email = $1 AND id != $2`, [email, id])).rows[0];
-      if (existing) return res.status(400).json({ error: "Ese nombre de usuario ya está en uso" });
+      const { data: existing } = await supabase.from("users").select("id").eq("email", email).neq("id", id);
+      if (existing?.length) return res.status(400).json({ error: "Ese nombre de usuario ya está en uso" });
     }
 
-    const sets = [];
-    const vals = [];
-    let idx = 1;
-    if (fullName) { sets.push(`full_name = $${idx++}`); vals.push(fullName); }
-    if (email) { sets.push(`email = $${idx++}`); vals.push(email); }
-    if (password) { sets.push(`password_hash = $${idx++}`); vals.push(bcrypt.hashSync(password, 10)); }
+    const updates = {};
+    if (fullName) updates.full_name = fullName;
+    if (email) updates.email = email;
+    if (password) updates.password_hash = bcrypt.hashSync(password, 10);
     if (role) {
-      const roleRow = (await query(`SELECT id FROM roles WHERE name = $1`, [role.toLowerCase()])).rows[0];
-      if (roleRow) { sets.push(`role_id = $${idx++}`); vals.push(roleRow.id); }
+      const { data: roleRow } = await supabase.from("roles").select("id").eq("name", role.toLowerCase());
+      if (roleRow?.length) updates.role_id = roleRow[0].id;
     }
 
-    if (sets.length) {
-      vals.push(id);
-      await query(`UPDATE users SET ${sets.join(", ")}, updated_at = NOW() WHERE id = $${idx}`, vals);
+    if (Object.keys(updates).length) {
+      updates.updated_at = new Date().toISOString();
+      await supabase.from("users").update(updates).eq("id", id);
     }
 
     res.json({ success: true, message: "Usuario actualizado" });
@@ -152,11 +160,12 @@ router.delete("/users/:id", async (req, res) => {
     }
 
     const { id } = req.params;
-    const user = (await query(`SELECT email FROM users WHERE id = $1`, [id])).rows[0];
+    const { data: users } = await supabase.from("users").select("email").eq("id", id);
+    const user = users?.[0];
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
     if (user.email === "admin") return res.status(400).json({ error: "No puedes desactivar al administrador principal" });
 
-    await query(`UPDATE users SET active = 0 WHERE id = $1`, [id]);
+    await supabase.from("users").update({ active: 0 }).eq("id", id);
     res.json({ success: true, message: "Acceso quitado" });
   } catch (err) {
     if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {

@@ -1,6 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const { query } = require("../db");
+const { supabase } = require("../db");
 
 const router = express.Router();
 const SECRET = process.env.JWT_SECRET || "sanident-secret-key-cambiar-en-produccion";
@@ -20,29 +20,33 @@ router.get("/", auth, async (req, res) => {
   try {
     const search = (req.query.search || "").trim().toLowerCase();
     const sort = req.query.sort || "";
-    let rows;
+    let data, error;
     if (search) {
-      const result = await query(`
-        SELECT id, full_name, document_id, phone, created_at
-        FROM patients
-        WHERE LOWER(full_name) LIKE $1 OR document_id LIKE $1 OR phone LIKE $1
-        ORDER BY updated_at DESC
-      `, [`%${search}%`]);
-      rows = result.rows;
+      const result = await supabase
+        .from("patients")
+        .select("id, full_name, document_id, phone, created_at")
+        .or(`full_name.ilike.%${search}%,document_id.ilike.%${search}%,phone.ilike.%${search}%`)
+        .order("updated_at", { ascending: false });
+      data = result.data;
+      error = result.error;
     } else if (sort === "alpha") {
-      const result = await query(`
-        SELECT id, full_name, document_id, phone, created_at
-        FROM patients ORDER BY full_name ASC
-      `);
-      rows = result.rows;
+      const result = await supabase
+        .from("patients")
+        .select("id, full_name, document_id, phone, created_at")
+        .order("full_name", { ascending: true });
+      data = result.data;
+      error = result.error;
     } else {
-      const result = await query(`
-        SELECT id, full_name, document_id, phone, created_at
-        FROM patients ORDER BY updated_at DESC LIMIT 50
-      `);
-      rows = result.rows;
+      const result = await supabase
+        .from("patients")
+        .select("id, full_name, document_id, phone, created_at")
+        .order("updated_at", { ascending: false })
+        .limit(50);
+      data = result.data;
+      error = result.error;
     }
-    res.json(rows.map((p) => ({
+    if (error) throw error;
+    res.json((data || []).map((p) => ({
       id: String(p.id),
       fullName: p.full_name,
       documentId: p.document_id || "",
@@ -59,12 +63,13 @@ router.post("/", auth, async (req, res) => {
     const { fullName, documentId, phone } = req.body;
     if (!fullName) return res.status(400).json({ error: "Nombre requerido" });
 
-    const result = await query(
-      `INSERT INTO patients (created_by_user_id, full_name, document_id, phone) VALUES ($1, $2, $3, $4) RETURNING id`,
-      [req.user.id, fullName, documentId || "", phone || ""]
-    );
+    const { data, error } = await supabase
+      .from("patients")
+      .insert({ created_by_user_id: req.user.id, full_name: fullName, document_id: documentId || "", phone: phone || "" })
+      .select();
 
-    res.json({ id: String(result.rows[0].id), success: true });
+    if (error) throw error;
+    res.json({ id: String(data[0].id), success: true });
   } catch (err) {
     res.status(500).json({ error: "Error del servidor" });
   }
@@ -72,34 +77,40 @@ router.post("/", auth, async (req, res) => {
 
 router.post("/deduplicate", auth, async (req, res) => {
   try {
-    // Find duplicate names (case-insensitive)
-    const dupes = await query(`
-      SELECT LOWER(TRIM(full_name)) as clean_name, array_agg(id ORDER BY updated_at DESC) as ids
-      FROM patients
-      GROUP BY clean_name
-      HAVING COUNT(*) > 1
-    `);
+    const { data: patients, error } = await supabase
+      .from("patients")
+      .select("id, full_name, updated_at");
+    if (error) throw error;
+
+    const groups = {};
+    for (const p of patients) {
+      const key = p.full_name.trim().toLowerCase();
+      if (!groups[key]) groups[key] = [];
+      groups[key].push({ id: p.id, updatedAt: p.updated_at });
+    }
+
     let removed = 0;
-    for (const row of dupes.rows) {
-      const ids = row.ids;
-      const keepId = ids[0];
-      const deleteIds = ids.slice(1);
-      // Reassign clinical_records to kept patient
-      for (const delId of deleteIds) {
-        await query(`UPDATE clinical_records SET patient_id = $1 WHERE patient_id = $2`, [keepId, delId]);
-        await query(`DELETE FROM patient_files WHERE patient_id = $1`, [delId]);
-        await query(`DELETE FROM patients WHERE id = $1`, [delId]);
-        removed++;
+    for (const ids of Object.values(groups)) {
+      if (ids.length > 1) {
+        ids.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        const keepId = ids[0].id;
+        for (let i = 1; i < ids.length; i++) {
+          await supabase.from("clinical_records").update({ patient_id: keepId }).eq("patient_id", ids[i].id);
+          await supabase.from("patient_files").delete().eq("patient_id", ids[i].id);
+          await supabase.from("patients").delete().eq("id", ids[i].id);
+          removed++;
+        }
       }
     }
-    // Return updated list
-    const result = await query(`
-      SELECT id, full_name, document_id, phone, created_at
-      FROM patients ORDER BY full_name ASC
-    `);
+
+    const { data: updated } = await supabase
+      .from("patients")
+      .select("id, full_name, document_id, phone, created_at")
+      .order("full_name", { ascending: true });
+
     res.json({
       removed,
-      patients: result.rows.map((p) => ({
+      patients: (updated || []).map((p) => ({
         id: String(p.id),
         fullName: p.full_name,
         documentId: p.document_id || "",

@@ -1,6 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const { query } = require("../db");
+const { supabase } = require("../db");
 
 const router = express.Router();
 const SECRET = process.env.JWT_SECRET || "sanident-secret-key-cambiar-en-produccion";
@@ -19,11 +19,15 @@ function auth(req, res, next) {
 router.get("/:patientId", auth, async (req, res) => {
   try {
     const { patientId } = req.params;
-    const result = await query(
-      `SELECT * FROM clinical_records WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [patientId]
-    );
-    const record = result.rows[0];
+    const { data: records, error } = await supabase
+      .from("clinical_records")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+    const record = records?.[0];
     if (!record) return res.json(null);
 
     res.json({
@@ -59,23 +63,28 @@ router.post("/:patientId", auth, async (req, res) => {
     const { patientId } = req.params;
     const data = req.body;
 
-    const patient = (await query(`SELECT id FROM patients WHERE id = $1`, [patientId])).rows[0];
+    const { data: patient } = await supabase.from("patients").select("id").eq("id", patientId).maybeSingle();
     if (!patient) {
-      await query(
-        `INSERT INTO patients (id, created_by_user_id, full_name) VALUES ($1, $2, $3)`,
-        [patientId, req.user.id, (data.patient?.fullName || "").trim() || "Paciente"]
-      );
+      await supabase.from("patients").insert({
+        id: patientId,
+        created_by_user_id: req.user.id,
+        full_name: (data.patient?.fullName || "").trim() || "Paciente",
+      });
     } else {
-      await query(
-        `UPDATE patients SET full_name = $1, document_id = $2, phone = $3, updated_at = NOW() WHERE id = $4`,
-        [data.patient?.fullName || "", data.patient?.documentId || "", data.patient?.phone || "", patientId]
-      );
+      await supabase.from("patients").update({
+        full_name: data.patient?.fullName || "",
+        document_id: data.patient?.documentId || "",
+        phone: data.patient?.phone || "",
+        updated_at: new Date().toISOString(),
+      }).eq("id", patientId);
     }
 
-    const existing = (await query(
-      `SELECT id FROM clinical_records WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [patientId]
-    )).rows[0];
+    const { data: existing } = await supabase
+      .from("clinical_records")
+      .select("id")
+      .eq("patient_id", patientId)
+      .order("created_at", { ascending: false })
+      .limit(1);
 
     const recordData = {
       full_name: data.patient?.fullName || "",
@@ -96,16 +105,10 @@ router.post("/:patientId", auth, async (req, res) => {
       ortho_json: JSON.stringify(data.ortho || {}),
     };
 
-    if (existing) {
-      const cols = Object.keys(recordData).map((k, i) => `${k} = $${i + 1}`).join(", ");
-      const vals = Object.values(recordData);
-      await query(`UPDATE clinical_records SET ${cols}, updated_at = NOW() WHERE patient_id = $${vals.length + 1}`,
-        [...vals, patientId]);
+    if (existing?.length) {
+      await supabase.from("clinical_records").update({ ...recordData, updated_at: new Date().toISOString() }).eq("patient_id", patientId);
     } else {
-      const cols = ["patient_id", "dentist_user_id", ...Object.keys(recordData)];
-      const placeholders = cols.map((_, i) => `$${i + 1}`).join(", ");
-      const vals = [patientId, req.user.id, ...Object.values(recordData)];
-      await query(`INSERT INTO clinical_records (${cols.join(", ")}) VALUES (${placeholders})`, vals);
+      await supabase.from("clinical_records").insert({ patient_id: patientId, dentist_user_id: req.user.id, ...recordData });
     }
 
     res.json({ success: true, id: String(patientId) });
