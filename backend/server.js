@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const { migrate } = require("./db");
+const { query, migrate } = require("./db");
 
 const authRoutes = require("./routes/auth");
 const patientRoutes = require("./routes/patients");
@@ -23,7 +23,13 @@ app.use("/api/patients", patientRoutes);
 app.use("/api/records", recordRoutes);
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  try {
+    const roles = query(`SELECT count(*) as count FROM roles`).rows[0];
+    const users = query(`SELECT count(*) as count FROM users`).rows[0];
+    res.json({ status: "ok", db: true, roles: roles.count, users: users.count });
+  } catch (e) {
+    res.json({ status: "ok", db: false, error: e.message });
+  }
 });
 
 app.listen(PORT, () => {
