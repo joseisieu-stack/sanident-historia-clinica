@@ -107,7 +107,7 @@ const state = {
   ortho: null,
 };
 
-const API_URL = localStorage.getItem("sanident.apiUrl") || "http://localhost:3000/api";
+const API_URL = localStorage.getItem("sanident.apiUrl") || "https://sanident-api.onrender.com/api";
 const storageKey = "odontologia.historiaClinica.v2";
 const patientIndexKey = "odontologia.pacientes.index.v1";
 const patientRecordPrefix = "odontologia.paciente.";
