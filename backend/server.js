@@ -33,40 +33,6 @@ app.get("/api/health", (req, res) => {
   }
 });
 
-app.get("/api/debug", (req, res) => {
-  try {
-    const { email, password } = req.query;
-    if (!email) return res.json({ error: "missing email" });
-    // Test the actual query() function
-    const sqlParam = `
-      SELECT u.id, u.full_name, u.email, u.password_hash, u.active, r.name as role
-      FROM users u JOIN roles r ON u.role_id = r.id
-      WHERE u.email = $1 AND u.active = 1
-    `;
-    const { query: q } = require("./db");
-    const directSql = `
-      SELECT u.id, u.full_name, u.email, u.password_hash, u.active, r.name as role
-      FROM users u JOIN roles r ON u.role_id = r.id
-      WHERE u.email = ? AND u.active = 1
-    `;
-    const stmt = require("./db").db.prepare(directSql);
-    const directRows = stmt.all(email);
-    let queryResult;
-    try {
-      queryResult = q(sqlParam, [email]);
-    } catch (e) {
-      queryResult = { error: e.message };
-    }
-    res.json({
-      directSql,
-      directResult: directRows,
-      viaQuery: queryResult,
-    });
-  } catch (e) {
-    res.json({ error: e.message });
-  }
-});
-
 app.listen(PORT, () => {
   console.log(`Sanident backend running on http://localhost:${PORT}`);
   migrate();
