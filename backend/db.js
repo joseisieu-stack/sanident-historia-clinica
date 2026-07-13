@@ -11,16 +11,29 @@ function query(sql, params = []) {
   const converted = sql
     .replace(/\$\d+/g, "?")
     .replace(/\bNOW\(\)/gi, "CURRENT_TIMESTAMP");
+  console.log("QUERY:", JSON.stringify(converted), "PARAMS:", JSON.stringify(params), "COUNT:", params.length);
   const stmt = db.prepare(converted);
+  console.log("STMT params:", stmt.parameters);
   const isSelect = /^\s*SELECT/i.test(converted);
   if (isSelect) {
-    return { rows: stmt.all(...params) };
+    try {
+      return { rows: stmt.all(...params) };
+    } catch (e) {
+      console.log("QUERY ERROR:", e.message);
+      throw e;
+    }
   }
-  const info = stmt.run(...params);
-  if (/RETURNING\s+\bid\b/i.test(converted)) {
-    return { rows: [{ id: info.lastInsertRowid }] };
+  try {
+    const info = stmt.run(...params);
+    console.log("RUN OK:", JSON.stringify(info));
+    if (/RETURNING\s+\bid\b/i.test(converted)) {
+      return { rows: [{ id: info.lastInsertRowid }] };
+    }
+    return { rows: [] };
+  } catch (e) {
+    console.log("QUERY RUN ERROR:", e.message);
+    throw e;
   }
-  return { rows: [] };
 }
 
 function migrate() {
@@ -88,4 +101,4 @@ function migrate() {
   console.log("Base de datos lista");
 }
 
-module.exports = { query, migrate };
+module.exports = { query, migrate, db };
