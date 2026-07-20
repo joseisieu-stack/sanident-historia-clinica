@@ -1887,6 +1887,39 @@ document.querySelector("#printButton").addEventListener("click", async () => { a
 document.querySelector("#openChartButton").addEventListener("click", () => showView("chart"));
 document.querySelector("#backClinicalButton").addEventListener("click", () => showView("clinical"));
 document.querySelector("#logoutButton").addEventListener("click", closeSession);
+
+document.querySelector("#exportButton").addEventListener("click", async () => {
+  try {
+    const result = await api("/records/export");
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sanident-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Exportado correctamente");
+  } catch (e) {
+    showToast("Error al exportar: " + e.message);
+  }
+});
+
+document.querySelector("#importButton").addEventListener("click", () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.onchange = async () => {
+    try {
+      const text = await input.files[0].text();
+      const data = JSON.parse(text);
+      await api("/records/import", { method: "POST", body: JSON.stringify(data) });
+      showToast("Importado correctamente");
+    } catch (e) {
+      showToast("Error al importar: " + e.message);
+    }
+  };
+  input.click();
+});
 document.querySelector("#closeUsersButton").addEventListener("click", () => userAdmin.classList.add("hidden"));
 manageUsersButton.addEventListener("click", async () => {
   cancelEdit();

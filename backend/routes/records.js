@@ -114,4 +114,48 @@ router.post("/:patientId", auth, async (req, res) => {
   }
 });
 
+router.get("/export", auth, async (req, res) => {
+  try {
+    const patients = query("SELECT * FROM patients").rows;
+    const records = [];
+    for (const p of patients) {
+      const r = query("SELECT * FROM clinical_records WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1", [p.id]).rows[0];
+      if (r) records.push(r);
+    }
+    const users = query("SELECT id, role_id, full_name, email, active, created_at FROM users").rows;
+    res.json({ exportedAt: new Date().toISOString(), patients, records, users });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/import", auth, async (req, res) => {
+  try {
+    const data = req.body;
+    if (!data.patients || !data.records) {
+      return res.status(400).json({ error: "Formato inválido" });
+    }
+    let imported = 0;
+    for (const p of data.patients) {
+      const existing = query("SELECT id FROM patients WHERE id = $1", [p.id]).rows[0];
+      if (!existing) {
+        query("INSERT INTO patients (id, full_name, document_id, birth_date, phone, email, address) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+          [p.id, p.full_name || "", p.document_id || "", p.birth_date || "", p.phone || "", p.email || "", p.address || ""]);
+        imported++;
+      }
+    }
+    for (const r of data.records) {
+      const existing = query("SELECT id FROM clinical_records WHERE patient_id = $1", [r.patient_id]).rows[0];
+      if (!existing) {
+        query("INSERT INTO clinical_records (patient_id, dentist_user_id, full_name, document_id, birth_date, phone, reason, medical_history, diagnosis, treatment_plan, patient_photo, auxiliary_exams, budget_json, appointments_json, chart_json, chart_diagnosis, chart_observations, ortho_json) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)",
+          [r.patient_id, r.dentist_user_id || req.user.id, r.full_name || "", r.document_id || "", r.birth_date || "", r.phone || "", r.reason || "", r.medical_history || "", r.diagnosis || "", r.treatment_plan || "", r.patient_photo || "", r.auxiliary_exams || "[]", r.budget_json || "{}", r.appointments_json || "[]", r.chart_json || "{}", r.chart_diagnosis || "", r.chart_observations || "", r.ortho_json || "{}"]);
+        imported++;
+      }
+    }
+    res.json({ success: true, imported });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
