@@ -60,6 +60,7 @@
       <div class="header-actions">
         <span id="sessionUser" class="session-pill"></span>
         <button class="primary-button hidden" id="manageUsersButton" type="button">Crear usuario</button>
+        <button class="ghost-button" id="searchPatientButton" type="button">Buscar Pac</button>
         <button class="ghost-button" id="clearButton" type="button">Historia nueva</button>
         <button class="ghost-button" id="printButton" type="button">Imprimir PDF</button>
         <button class="primary-button" id="saveButton" type="button">Guardar</button>
@@ -114,12 +115,6 @@
 
     <main class="app-shell">
       <section class="panel patient-panel app-view active" id="clinicalView" aria-labelledby="patientTitle">
-        <section class="patient-finder-card" aria-label="Buscar paciente">
-          <span id="patientCount" class="patient-count" aria-live="polite"></span>
-          <input id="patientSearch" type="search" placeholder="Buscar paciente atendido">
-          <button class="ghost-button compact" id="listAllButton" type="button" style="width:100%;margin-top:6px">Ver todos los pacientes</button>
-          <div id="patientList" class="patient-list"></div>
-        </section>
 
         <div class="section-heading">
           <h2 id="patientTitle">Historia clinica</h2>
@@ -477,10 +472,12 @@
     <div id="patientModal" class="modal-overlay hidden">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Todos los pacientes</h3>
+          <h3>Buscar paciente</h3>
           <button class="ghost-button compact" id="closePatientModal" type="button">&times;</button>
         </div>
-        <div id="patientModalList" class="patient-list"></div>
+        <input id="patientSearch" type="search" placeholder="Buscar por nombre, documento o teléfono" autofocus>
+        <span id="patientCount" class="patient-count" aria-live="polite"></span>
+        <div id="patientList" class="patient-list"></div>
       </div>
     </div>
 

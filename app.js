@@ -196,9 +196,8 @@ const addAppointmentButton = document.querySelector("#addAppointmentButton");
 const patientSearch = document.querySelector("#patientSearch");
 const patientList = document.querySelector("#patientList");
 const patientCount = document.querySelector("#patientCount");
-const listAllButton = document.querySelector("#listAllButton");
+const searchPatientButton = document.querySelector("#searchPatientButton");
 const patientModal = document.querySelector("#patientModal");
-const patientModalList = document.querySelector("#patientModalList");
 const closePatientModal = document.querySelector("#closePatientModal");
 const patientPhotoInput = document.querySelector("#patientPhotoInput");
 const patientPhotoPreview = document.querySelector("#patientPhotoPreview");
@@ -1278,16 +1277,13 @@ async function listAllPatients() {
     const patients = result.patients;
     const removed = result.removed;
 
-    patientModalList.innerHTML = "";
+    patientList.innerHTML = "";
     if (!patients.length) {
-      patientModalList.innerHTML = `<div class="empty-list">No hay pacientes registrados.</div>`;
+      patientList.innerHTML = `<div class="empty-list">No hay pacientes registrados.</div>`;
     } else {
       let msg = `${patients.length} pacientes`;
       if (removed > 0) msg += ` (${removed} duplicados eliminados)`;
-      const info = document.createElement("div");
-      info.className = "patient-count";
-      info.textContent = msg;
-      patientModalList.appendChild(info);
+      patientCount.textContent = msg;
 
       patients.forEach((patient) => {
         const div = document.createElement("div");
@@ -1301,16 +1297,16 @@ async function listAllPatients() {
         `;
         div.addEventListener("click", async () => {
           patientModal.classList.add("hidden");
-          patientSearch.value = patient.fullName;
+          patientSearch.value = "";
           await loadRecord(patient.id);
           renderPatientList();
         });
-        patientModalList.appendChild(div);
+        patientList.appendChild(div);
       });
     }
     patientModal.classList.remove("hidden");
   } catch {
-    patientModalList.innerHTML = `<div class="empty-list">Error al cargar pacientes.</div>`;
+    patientList.innerHTML = `<div class="empty-list">Error al cargar pacientes.</div>`;
     patientModal.classList.remove("hidden");
   }
 }
@@ -2074,8 +2070,10 @@ addOrthoControlButton.addEventListener("click", () => {
 
 patientSearch.addEventListener("input", renderPatientList);
 
-listAllButton.addEventListener("click", () => {
+searchPatientButton.addEventListener("click", () => {
   patientSearch.value = "";
+  patientList.innerHTML = "";
+  patientCount.textContent = "";
   listAllPatients();
 });
 
@@ -2085,10 +2083,11 @@ patientModal.addEventListener("click", (e) => { if (e.target === patientModal) p
 const clearButton = document.querySelector("#clearButton");
 
 patientList.addEventListener("click", async (event) => {
-  const button = event.target.closest(".patient-card");
-  if (!button) return;
-  await loadRecord(button.dataset.patientId);
-  renderPatientList();
+  const card = event.target.closest(".patient-card");
+  if (!card) return;
+  patientModal.classList.add("hidden");
+  patientSearch.value = "";
+  await loadRecord(card.dataset.patientId);
 });
 
 document.querySelector("#resetChartButton").addEventListener("click", () => {
