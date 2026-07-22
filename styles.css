@@ -1370,6 +1370,7 @@ button:focus-visible {
 
   body {
     background: #fff;
+    font-size: 1.05rem;
   }
 
   .topbar {
@@ -1460,7 +1461,7 @@ button:focus-visible {
   }
 
   label {
-    font-size: 0.92rem;
+    font-size: 1rem;
     gap: 4px;
   }
 
@@ -1472,7 +1473,7 @@ button:focus-visible {
     border-color: #bfc9d0;
     background: #fff;
     padding: 6px 8px;
-    font-size: 0.92rem;
+    font-size: 1rem;
   }
 
   textarea {
@@ -1491,7 +1492,7 @@ button:focus-visible {
   }
 
   .odontogram {
-    gap: 8px;
+    gap: 10px;
     margin-top: 10px;
   }
 
@@ -1510,24 +1511,24 @@ button:focus-visible {
   }
 
   .tooth {
-    width: 43px;
-    min-width: 43px;
-    padding: 3px;
+    width: 48px;
+    min-width: 48px;
+    padding: 4px;
     gap: 2px;
     break-inside: avoid;
   }
 
   .tooth-svg {
-    height: 58px;
+    height: 65px;
   }
 
   .tooth-code {
-    min-height: 14px;
-    font-size: 0.6rem;
+    min-height: 16px;
+    font-size: 0.65rem;
   }
 
   .tooth-number {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
   }
 
   .muted {
