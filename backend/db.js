@@ -9,14 +9,16 @@ db.pragma("foreign_keys = ON");
 
 function query(sql, params = []) {
   const converted = sql
-    .replace(/\$\d+/g, "?")
+    .replace(/\$(\d+)/g, "?$1")
     .replace(/\bNOW\(\)/gi, "CURRENT_TIMESTAMP");
   const stmt = db.prepare(converted);
   const isSelect = /^\s*SELECT/i.test(converted);
+  const bind = {};
+  params.forEach((v, i) => { bind[i + 1] = v; });
   if (isSelect) {
-    return { rows: stmt.all(...params) };
+    return { rows: stmt.all(bind) };
   }
-  const info = stmt.run(...params);
+  const info = stmt.run(bind);
   if (/RETURNING\s+\bid\b/i.test(converted)) {
     return { rows: [{ id: info.lastInsertRowid }] };
   }
