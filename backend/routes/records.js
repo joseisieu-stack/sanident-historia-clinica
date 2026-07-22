@@ -62,13 +62,13 @@ router.post("/:patientId", auth, async (req, res) => {
     const patient = query(`SELECT id FROM patients WHERE id = $1`, [patientId]).rows[0];
     if (!patient) {
       query(
-        `INSERT INTO patients (id, created_by_user_id, full_name) VALUES ($1, $2, $3)`,
-        [patientId, req.user.id, (data.patient?.fullName || "").trim() || "Paciente"]
+        `INSERT INTO patients (id, created_by_user_id, full_name, document_id, birth_date, phone, email, address) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [patientId, req.user.id, (data.patient?.fullName || "").trim() || "Paciente", data.patient?.documentId || "", data.patient?.birthDate || "", data.patient?.phone || "", data.patient?.email || "", data.patient?.address || ""]
       );
     } else {
       query(
-        `UPDATE patients SET full_name = $1, document_id = $2, phone = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4`,
-        [data.patient?.fullName || "", data.patient?.documentId || "", data.patient?.phone || "", patientId]
+        `UPDATE patients SET full_name = $1, document_id = $2, phone = $3, birth_date = $4, email = $5, address = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $7`,
+        [data.patient?.fullName || "", data.patient?.documentId || "", data.patient?.phone || "", data.patient?.birthDate || "", data.patient?.email || "", data.patient?.address || "", patientId]
       );
     }
 
