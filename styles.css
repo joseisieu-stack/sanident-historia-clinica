@@ -156,10 +156,11 @@ select {
 .session-pill {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 999px;
-  padding: 8px 10px;
+  min-height: 42px;
+  padding: 10px 14px;
   color: #e6f6ef;
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .hidden {
@@ -235,26 +236,26 @@ select {
   align-items: center;
 }
 
+.small-edit-button,
+.small-danger-button {
+  min-height: 42px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
 .small-edit-button {
   border: 1px solid #b8c3ca;
-  border-radius: 8px;
   background: #f7f9fa;
   color: var(--text);
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 800;
-  padding: 8px 10px;
 }
 
 .small-danger-button {
   border: 1px solid #f0a8ae;
-  border-radius: 8px;
   background: #fff2f3;
   color: var(--red);
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 800;
-  padding: 8px 10px;
 }
 
 .topbar {
@@ -1669,12 +1670,13 @@ button:focus-visible {
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
   white-space: nowrap;
-  border: none;
+  border: 1px solid transparent;
 }
 
 .comp-badge.yes {
