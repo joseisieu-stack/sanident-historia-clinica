@@ -59,13 +59,9 @@
       </div>
       <div class="header-actions">
         <span id="sessionUser" class="session-pill"></span>
-        <button class="primary-button hidden" id="manageUsersButton" type="button">Crear usuario</button>
-        <button class="ghost-button" id="searchPatientButton" type="button">Buscar Pac</button>
-        <button class="ghost-button" id="clearButton" type="button">Historia nueva</button>
-        <button class="ghost-button" id="printButton" type="button">Imprimir PDF</button>
-        <button class="primary-button" id="saveButton" type="button">Guardar</button>
-        <button class="ghost-button" id="exportButton" type="button">📥 Exportar datos</button>
-        <button class="ghost-button" id="importButton" type="button">📤 Importar datos</button>
+        <button class="ghost-button" id="searchPatientButton" type="button">🔍 Buscar Pac</button>
+        <button class="primary-button" id="saveButton" type="button">💾 Guardar</button>
+        <button class="ghost-button" id="printButton" type="button">🖨 Imprimir</button>
         <button class="ghost-button" id="logoutButton" type="button">Salir</button>
       </div>
     </header>
@@ -112,6 +108,15 @@
         <div id="userList" class="user-list"></div>
       </div>
     </section>
+
+    <div class="app-body">
+      <aside class="sidebar" id="sidebar">
+        <p class="sidebar-title">Herramientas</p>
+        <button class="sidebar-button hidden" id="manageUsersButton" type="button">👤 Crear usuario</button>
+        <button class="sidebar-button" id="clearButton" type="button">📄 Historia nueva</button>
+        <button class="sidebar-button hidden" id="exportButton" type="button">📥 Exportar datos</button>
+        <button class="sidebar-button hidden" id="importButton" type="button">📤 Importar datos</button>
+      </aside>
 
     <main class="app-shell">
       <section class="panel patient-panel app-view active" id="clinicalView" aria-labelledby="patientTitle">
@@ -468,6 +473,7 @@
         <div id="odontogramSummary" class="odontogram-summary"></div>
       </section>
     </main>
+    </div>
 
     <div id="patientModal" class="modal-overlay hidden">
       <div class="modal-content">

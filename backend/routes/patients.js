@@ -106,4 +106,27 @@ router.post("/deduplicate", auth, async (req, res) => {
   }
 });
 
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    const decoded = jwt.verify(token, SECRET);
+    if (decoded.role?.toLowerCase() !== "administrador") {
+      return res.status(403).json({ error: "Solo administradores" });
+    }
+
+    const { id } = req.params;
+    const patient = query(`SELECT id FROM patients WHERE id = $1`, [id]).rows[0];
+    if (!patient) return res.status(404).json({ error: "Paciente no encontrado" });
+
+    query(`DELETE FROM clinical_records WHERE patient_id = $1`, [id]);
+    query(`DELETE FROM patient_files WHERE patient_id = $1`, [id]);
+    query(`DELETE FROM patients WHERE id = $1`, [id]);
+
+    res.json({ success: true, message: "Paciente eliminado" });
+  } catch (err) {
+    console.error("Error eliminando paciente:", err);
+    res.status(500).json({ error: "Error del servidor" });
+  }
+});
+
 module.exports = router;

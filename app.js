@@ -497,6 +497,9 @@ function applySession(session) {
   document.querySelector("#addAppointmentButton").classList.toggle("hidden", readonly);
   document.querySelector("#clearButton").classList.toggle("hidden", readonly);
   document.querySelector("#openChartButton").classList.toggle("hidden", readonly);
+  document.querySelector("#exportButton").classList.toggle("hidden", session?.role !== "Administrador");
+  document.querySelector("#importButton").classList.toggle("hidden", session?.role !== "Administrador");
+  document.querySelector("#sidebar").classList.toggle("hidden", readonly);
   form.querySelectorAll("input, textarea, select").forEach((el) => {
     el.readOnly = readonly;
   });
@@ -1255,18 +1258,32 @@ function renderPatientList() {
     }
 
     const fragment = document.createDocumentFragment();
-    patients.forEach((patient) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `patient-card${patient.id === currentPatientId ? " active" : ""}`;
-      button.dataset.patientId = patient.id;
-      const date = patient.savedAt ? new Date(patient.savedAt).toLocaleDateString("es-PE") : "";
-      button.innerHTML = `
-        <strong>${patient.fullName}</strong>
-        <span>DNI/ID: ${patient.documentId || "sin documento"} | Tel: ${patient.phone || "sin telefono"} | ${date}</span>
-      `;
-      fragment.appendChild(button);
-    });
+      const session = currentSession();
+      const isAdmin = session?.role === "Administrador";
+      patients.forEach((patient) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `patient-card${patient.id === currentPatientId ? " active" : ""}`;
+        button.dataset.patientId = patient.id;
+        const date = patient.savedAt ? new Date(patient.savedAt).toLocaleDateString("es-PE") : "";
+        button.innerHTML = `
+          <strong>${patient.fullName}</strong>
+          <span>DNI/ID: ${patient.documentId || "sin documento"} | Tel: ${patient.phone || "sin telefono"} | ${date}</span>
+          ${isAdmin ? '<button class="delete-patient-btn" data-id="' + patient.id + '" title="Eliminar paciente">&times;</button>' : ""}
+        `;
+        button.querySelector(".delete-patient-btn")?.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!confirm(`¿Eliminar a "${patient.fullName}" y todas sus historias?`)) return;
+          try {
+            await api(`/patients/${patient.id}`, { method: "DELETE" });
+            showToast("Paciente eliminado");
+            listAllPatients();
+          } catch (err) {
+            showToast("Error al eliminar: " + err.message);
+          }
+        });
+        fragment.appendChild(button);
+      });
     patientList.appendChild(fragment);
   });
 }
@@ -1285,6 +1302,8 @@ async function listAllPatients() {
       if (removed > 0) msg += ` (${removed} duplicados eliminados)`;
       patientCount.textContent = msg;
 
+      const session = currentSession();
+      const isAdmin = session?.role === "Administrador";
       patients.forEach((patient) => {
         const div = document.createElement("div");
         div.className = `patient-card${patient.id === currentPatientId ? " active" : ""}`;
@@ -1294,12 +1313,25 @@ async function listAllPatients() {
         div.innerHTML = `
           <strong>${patient.fullName}</strong>
           <span>DNI/ID: ${patient.documentId || "sin documento"} | Tel: ${patient.phone || "sin telefono"} | ${date}</span>
+          ${isAdmin ? '<button class="delete-patient-btn" data-id="' + patient.id + '" title="Eliminar paciente">&times;</button>' : ""}
         `;
-        div.addEventListener("click", async () => {
+        div.addEventListener("click", async (e) => {
+          if (e.target.closest(".delete-patient-btn")) return;
           patientModal.classList.add("hidden");
           patientSearch.value = "";
           await loadRecord(patient.id);
           renderPatientList();
+        });
+        div.querySelector(".delete-patient-btn")?.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!confirm(`¿Eliminar a "${patient.fullName}" y todas sus historias?`)) return;
+          try {
+            await api(`/patients/${patient.id}`, { method: "DELETE" });
+            showToast("Paciente eliminado");
+            listAllPatients();
+          } catch (err) {
+            showToast("Error al eliminar: " + err.message);
+          }
         });
         patientList.appendChild(div);
       });

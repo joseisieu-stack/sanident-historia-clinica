@@ -360,6 +360,56 @@ h2 {
   padding: 22px clamp(12px, 3vw, 32px) 36px;
 }
 
+.app-body {
+  display: flex;
+  align-items: flex-start;
+}
+
+.sidebar {
+  position: sticky;
+  top: 20px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px clamp(12px, 2vw, 24px);
+}
+
+.sidebar-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #888;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.06em;
+}
+
+.sidebar-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text, #333);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.sidebar-button:hover {
+  background: #f4f4f4;
+  border-color: #bbb;
+}
+
+.sidebar.hidden {
+  display: none;
+}
+
 .app-view {
   display: none;
 }
@@ -462,6 +512,7 @@ label:nth-child(n + 5) {
   gap: 4px;
   padding: 10px 12px;
   text-align: left;
+  position: relative;
 }
 
 .patient-card.active {
@@ -477,6 +528,30 @@ label:nth-child(n + 5) {
   color: var(--muted);
   font-size: 0.78rem;
   line-height: 1.25;
+}
+
+.delete-patient-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.delete-patient-btn:hover {
+  opacity: 1;
 }
 
 .empty-list {
@@ -1302,6 +1377,9 @@ button:focus-visible {
   .app-shell {
     padding-inline: 12px;
   }
+  .sidebar {
+    padding: 12px;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1326,6 +1404,23 @@ button:focus-visible {
 
   .header-actions button {
     flex: 1;
+  }
+
+  .app-body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    position: static;
+    padding: 0 clamp(12px, 3vw, 32px);
+  }
+
+  .sidebar-title {
+    width: 100%;
+    margin-bottom: 2px;
   }
 
   .form-grid {
@@ -1404,7 +1499,8 @@ button:focus-visible {
   .selection-box,
   #saveStatus,
   .receipt-card,
-  .ortho-card {
+  .ortho-card,
+  .sidebar {
     display: none !important;
   }
 
